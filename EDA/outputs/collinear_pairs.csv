@@ -1,0 +1,11 @@
+feature_1,feature_2,abs_corr
+GarageQual,GarageCond,0.959
+PoolArea,PoolQC,0.937
+GarageCars,GarageArea,0.882
+Fireplaces,FireplaceQu,0.863
+YearBuilt,GarageYrBlt,0.826
+GrLivArea,TotRmsAbvGrd,0.825
+TotalBsmtSF,1stFlrSF,0.82
+BsmtFinSF2,BsmtFinType2,0.789
+OverallQual,ExterQual,0.726
+ExterQual,KitchenQual,0.716

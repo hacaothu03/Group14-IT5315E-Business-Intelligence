@@ -1,0 +1,212 @@
+{
+  "n_rows": 1460,
+  "n_cols": 81,
+  "n_numeric": 36,
+  "n_categorical": 43,
+  "saleprice": {
+    "min": 34900.0,
+    "max": 755000.0,
+    "mean": 180921.19589041095,
+    "median": 163000.0,
+    "skew_raw": 1.8828757597682129,
+    "skew_log": 0.12134661989685333,
+    "kurtosis_raw": 6.536281860064529
+  },
+  "missing": {
+    "n_cols_with_missing": 19,
+    "n_genuine": 3,
+    "top": [
+      {
+        "column": "PoolQC",
+        "n_missing": 1453,
+        "pct_missing": 99.52,
+        "na_meaning": "absent (NA = feature does not exist)"
+      },
+      {
+        "column": "MiscFeature",
+        "n_missing": 1406,
+        "pct_missing": 96.3,
+        "na_meaning": "absent (NA = feature does not exist)"
+      },
+      {
+        "column": "Alley",
+        "n_missing": 1369,
+        "pct_missing": 93.77,
+        "na_meaning": "absent (NA = feature does not exist)"
+      },
+      {
+        "column": "Fence",
+        "n_missing": 1179,
+        "pct_missing": 80.75,
+        "na_meaning": "absent (NA = feature does not exist)"
+      },
+      {
+        "column": "MasVnrType",
+        "n_missing": 872,
+        "pct_missing": 59.73,
+        "na_meaning": "absent (NA = feature does not exist)"
+      },
+      {
+        "column": "FireplaceQu",
+        "n_missing": 690,
+        "pct_missing": 47.26,
+        "na_meaning": "absent (NA = feature does not exist)"
+      },
+      {
+        "column": "LotFrontage",
+        "n_missing": 259,
+        "pct_missing": 17.74,
+        "na_meaning": "genuine missing (needs imputation)"
+      },
+      {
+        "column": "GarageType",
+        "n_missing": 81,
+        "pct_missing": 5.55,
+        "na_meaning": "absent (NA = feature does not exist)"
+      }
+    ]
+  },
+  "outliers": {
+    "ids": [
+      524,
+      1299
+    ],
+    "detail": [
+      {
+        "Id": 524,
+        "GrLivArea": 4676,
+        "SalePrice": 184750,
+        "OverallQual": 10,
+        "Neighborhood": "Edwards",
+        "SaleCondition": "Partial",
+        "reason": "GrLivArea>4000 & SalePrice<300k (high-leverage outlier)"
+      },
+      {
+        "Id": 1299,
+        "GrLivArea": 5642,
+        "SalePrice": 160000,
+        "OverallQual": 10,
+        "Neighborhood": "Edwards",
+        "SaleCondition": "Partial",
+        "reason": "GrLivArea>4000 & SalePrice<300k (high-leverage outlier)"
+      }
+    ]
+  },
+  "top_corr": {
+    "OverallQual": 0.791,
+    "GrLivArea": 0.709,
+    "ExterQual": 0.683,
+    "KitchenQual": 0.66,
+    "GarageCars": 0.64,
+    "GarageArea": 0.623,
+    "TotalBsmtSF": 0.614,
+    "1stFlrSF": 0.606,
+    "BsmtQual": 0.585,
+    "FullBath": 0.561,
+    "GarageFinish": 0.549,
+    "TotRmsAbvGrd": 0.534,
+    "YearBuilt": 0.523,
+    "FireplaceQu": 0.52,
+    "YearRemodAdd": 0.507
+  },
+  "collinear_pairs": [
+    {
+      "feature_1": "GarageQual",
+      "feature_2": "GarageCond",
+      "abs_corr": 0.959
+    },
+    {
+      "feature_1": "PoolArea",
+      "feature_2": "PoolQC",
+      "abs_corr": 0.937
+    },
+    {
+      "feature_1": "GarageCars",
+      "feature_2": "GarageArea",
+      "abs_corr": 0.882
+    },
+    {
+      "feature_1": "Fireplaces",
+      "feature_2": "FireplaceQu",
+      "abs_corr": 0.863
+    },
+    {
+      "feature_1": "YearBuilt",
+      "feature_2": "GarageYrBlt",
+      "abs_corr": 0.826
+    },
+    {
+      "feature_1": "GrLivArea",
+      "feature_2": "TotRmsAbvGrd",
+      "abs_corr": 0.825
+    },
+    {
+      "feature_1": "TotalBsmtSF",
+      "feature_2": "1stFlrSF",
+      "abs_corr": 0.82
+    },
+    {
+      "feature_1": "BsmtFinSF2",
+      "feature_2": "BsmtFinType2",
+      "abs_corr": 0.789
+    },
+    {
+      "feature_1": "OverallQual",
+      "feature_2": "ExterQual",
+      "abs_corr": 0.726
+    },
+    {
+      "feature_1": "ExterQual",
+      "feature_2": "KitchenQual",
+      "abs_corr": 0.716
+    }
+  ],
+  "vif": {
+    "GrLivArea": 125.64,
+    "2ndFlrSF": 87.11,
+    "1stFlrSF": 70.2,
+    "GarageCars": 5.27,
+    "GarageArea": 4.93,
+    "TotalBsmtSF": 3.6,
+    "TotRmsAbvGrd": 3.36,
+    "OverallQual": 2.59,
+    "FullBath": 2.19,
+    "YearBuilt": 2.12
+  },
+  "neighborhood": {
+    "top5": {
+      "Somerst": 225500.0,
+      "Timber": 228475.0,
+      "StoneBr": 278000.0,
+      "NoRidge": 301500.0,
+      "NridgHt": 315000.0
+    },
+    "bottom5": {
+      "MeadowV": 88000.0,
+      "IDOTRR": 103000.0,
+      "BrDale": 106000.0,
+      "OldTown": 119000.0,
+      "Edwards": 121750.0
+    },
+    "ratio_max_min": 3.58
+  },
+  "age_corr": -0.523,
+  "overallqual_median": {
+    "1": 50150.0,
+    "2": 60000.0,
+    "3": 86250.0,
+    "4": 108000.0,
+    "5": 133000.0,
+    "6": 160000.0,
+    "7": 200141.0,
+    "8": 269750.0,
+    "9": 345000.0,
+    "10": 432390.0
+  },
+  "handoff_files": {
+    "missing_report.csv": "columns with missing values + NA-meaning  (-> Module 3)",
+    "outlier_candidates.csv": "high-leverage outliers to review          (-> Module 3)",
+    "correlation_top.csv": "features ranked by |corr| with SalePrice  (-> Module 4)",
+    "collinear_pairs.csv": "predictor pairs with |corr| >= 0.70       (-> Module 4)"
+  }
+}

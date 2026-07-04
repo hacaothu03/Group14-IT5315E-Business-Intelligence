@@ -67,6 +67,12 @@ data + dictionary           outliers, multicollinearity     outliers & missing  
 
 ## PART B — EDA EXECUTION PLAN
 
+> ### ✅ Execution status (updated 2026-07-04)
+> Steps 0–5 and 7 are **done** on the Kaggle base. Step 6 (synthetic data) is **pending Module 1**.
+> Deliverables: notebook [01_eda.ipynb](01_eda.ipynb) · written insights [EDA_FINDINGS.md](EDA_FINDINGS.md) ·
+> 10 charts in [figures/](figures/) · handoff files in [outputs/](outputs/) (`missing_report.csv`,
+> `outlier_candidates.csv`, `correlation_top.csv`, `collinear_pairs.csv`, `eda_summary.json`).
+
 ### B.0. Proposed folder structure (inside `EDA/`)
 ```
 EDA/
@@ -87,49 +93,49 @@ EDA/
 
 ### B.2. Detailed execution checklist
 
-**Step 0 — Setup & load** *(0.5 day)*
-- [ ] Create the notebook; import `pandas, numpy, matplotlib, seaborn, scipy`.
-- [ ] Load `train.csv`; cross-reference `data_description.txt` to understand column meanings.
-- [ ] Classify columns: numeric vs categorical vs ordinal (many "quality" columns like `ExterQual`, `BsmtQual`… are **ordinal**: Ex>Gd>TA>Fa>Po — handle with care).
+**Step 0 — Setup & load** *(0.5 day)* — ✅ done
+- [x] Create the notebook; import `pandas, numpy, matplotlib, seaborn, scipy`.
+- [x] Load `train.csv`; cross-reference `data_description.txt` to understand column meanings.
+- [x] Classify columns: numeric vs categorical vs ordinal (many "quality" columns like `ExterQual`, `BsmtQual`… are **ordinal**: Ex>Gd>TA>Fa>Po — handle with care).
 - [ ] (When available) merge Module 1's synthetic data.
 
-**Step 1 — Target variable `SalePrice`** *(0.5 day)*
-- [ ] Histogram + KDE of `SalePrice` → note the right skew.
-- [ ] Compute skewness & kurtosis; plot `log(SalePrice)` to show the log-transform brings it close to normal.
-- [ ] Q-Q plot. → **Handoff insight for Modules 4/5: use a log-transform on the target.**
+**Step 1 — Target variable `SalePrice`** *(0.5 day)* — ✅ done
+- [x] Histogram + KDE of `SalePrice` → note the right skew.
+- [x] Compute skewness & kurtosis; plot `log(SalePrice)` to show the log-transform brings it close to normal.
+- [x] Q-Q plot. → **Handoff insight for Modules 4/5: use a log-transform on the target.** *(skew 1.88 → 0.12)*
 
-**Step 2 — Missing values** *(0.5 day)*
-- [ ] Table of % missing per column, sorted descending; missing bar/heatmap.
-- [ ] Distinguish "NA means absent" (e.g. `PoolQC`, `Alley`, `FireplaceQu` → NA = no such amenity) vs "genuinely missing" (e.g. `LotFrontage`, `GarageYrBlt`).
-- [ ] **Export `outputs/missing_report.csv` → handoff to Module 3.**
+**Step 2 — Missing values** *(0.5 day)* — ✅ done
+- [x] Table of % missing per column, sorted descending; missing bar/heatmap.
+- [x] Distinguish "NA means absent" (e.g. `PoolQC`, `Alley`, `FireplaceQu` → NA = no such amenity) vs "genuinely missing" (e.g. `LotFrontage`, `GarageYrBlt`). *(19 cols missing; only 3 genuine)*
+- [x] **Export `outputs/missing_report.csv` → handoff to Module 3.**
 
-**Step 3 — Numeric variables** *(1 day)*
-- [ ] Histogram + boxplot for key numeric variables (`GrLivArea`, `TotalBsmtSF`, `LotArea`, `1stFlrSF`, `GarageArea`…).
-- [ ] Scatter **price vs area** (`GrLivArea` vs `SalePrice`) → catch this dataset's well-known outliers (2 homes >4000 sqft with very low prices).
-- [ ] **Export `outputs/outlier_candidates.csv` → handoff to Module 3.**
+**Step 3 — Numeric variables** *(1 day)* — ✅ done
+- [x] Histogram + boxplot for key numeric variables (`GrLivArea`, `TotalBsmtSF`, `LotArea`, `1stFlrSF`, `GarageArea`…).
+- [x] Scatter **price vs area** (`GrLivArea` vs `SalePrice`) → catch this dataset's well-known outliers (2 homes >4000 sqft with very low prices). *(Id 524 & 1299)*
+- [x] **Export `outputs/outlier_candidates.csv` → handoff to Module 3.**
 
-**Step 4 — Correlation & multicollinearity** *(1 day)*
-- [ ] Correlation heatmap across numeric variables and vs `SalePrice`.
-- [ ] Top 10–15 features most correlated with `SalePrice` (expected: `OverallQual`, `GrLivArea`, `GarageCars`, `TotalBsmtSF`, `YearBuilt`…).
-- [ ] Identify multicollinear pairs (high corr between predictors). If time permits, compute preliminary VIF.
-- [ ] **Export `outputs/correlation_top.csv` + collinear-pair list → handoff to Module 4.**
+**Step 4 — Correlation & multicollinearity** *(1 day)* — ✅ done
+- [x] Correlation heatmap across numeric variables and vs `SalePrice`.
+- [x] Top 10–15 features most correlated with `SalePrice` (expected: `OverallQual`, `GrLivArea`, `GarageCars`, `TotalBsmtSF`, `YearBuilt`…). *(confirmed; ordinal quality cols also rank high)*
+- [x] Identify multicollinear pairs (high corr between predictors). If time permits, compute preliminary VIF. *(10 pairs |r|≥0.7; VIF done)*
+- [x] **Export `outputs/correlation_top.csv` + collinear-pair list → handoff to Module 4.**
 
-**Step 5 — Categorical variables & group comparisons** *(1 day)*
-- [ ] Boxplot **`SalePrice` by `Neighborhood`** (location) → most vs least expensive areas.
-- [ ] Boxplot **`SalePrice` by `BldgType`/`HouseStyle`** (property type).
-- [ ] **`SalePrice` by property age**: create a temp `Age = YrSold − YearBuilt`, scatter/binned line → price vs age.
-- [ ] Boxplot by `OverallQual` (a very strong driver).
+**Step 5 — Categorical variables & group comparisons** *(1 day)* — ✅ done
+- [x] Boxplot **`SalePrice` by `Neighborhood`** (location) → most vs least expensive areas. *(3.58× spread)*
+- [x] Boxplot **`SalePrice` by `BldgType`/`HouseStyle`** (property type).
+- [x] **`SalePrice` by property age**: create a temp `Age = YrSold − YearBuilt`, scatter/binned line → price vs age. *(corr −0.52)*
+- [x] Boxplot by `OverallQual` (a very strong driver). *(median $50k→$432k across qual 1→10)*
 
 **Step 6 — Analyze the synthetic data (once Module 1 is done)** *(0.5 day)*
 - [ ] Check the distributions of synthetic variables (amenity score, days-on-market, interest rate…) for plausibility.
 - [ ] Scatter **price vs distance-to-amenities** (as the brief suggests).
 - [ ] Verify the synthetic ↔ `SalePrice` correlations point the expected business direction (closer to school/hospital → higher price?). → feed back to Module 1 if the generation logic looks unrealistic.
 
-**Step 7 — Synthesis & handoff** *(0.5 day)*
-- [ ] Write `EDA_FINDINGS.md`: 8–12 key insights, each with a one-line business meaning + chart link.
-- [ ] Export all key charts to `figures/` (reused by Module 8 for slides/report).
-- [ ] Finalize the 3 files in `outputs/` for Modules 3 & 4.
-- [ ] Commit & push branch `hacao`, open a PR.
+**Step 7 — Synthesis & handoff** *(0.5 day)* — ✅ done (PR optional)
+- [x] Write `EDA_FINDINGS.md`: 8–12 key insights, each with a one-line business meaning + chart link. *(10 insights)*
+- [x] Export all key charts to `figures/` (reused by Module 8 for slides/report). *(10 charts)*
+- [x] Finalize the files in `outputs/` for Modules 3 & 4. *(+ `collinear_pairs.csv`, `eda_summary.json`)*
+- [x] Commit & push branch `hacao`. *(open a PR when the team is ready)*
 
 ### B.3. Time estimate
 Total ~**5–6 working days**. Start immediately on the Kaggle base (Steps 0–5); insert Step 6 once Module 1 delivers the synthetic data.
