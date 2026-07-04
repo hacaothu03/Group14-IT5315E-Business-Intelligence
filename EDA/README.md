@@ -70,7 +70,7 @@ data + dictionary           outliers, multicollinearity     outliers & missing  
 > ### ✅ Execution status (updated 2026-07-04)
 > Steps 0–5 and 7 are **done** on the Kaggle base. Step 6 (synthetic data) is **pending Module 1**.
 > Deliverables: notebook [01_eda.ipynb](01_eda.ipynb) · written insights [EDA_FINDINGS.md](EDA_FINDINGS.md) ·
-> 10 charts in [figures/](figures/) · handoff files in [outputs/](outputs/) (`missing_report.csv`,
+> 11 charts in [figures/](figures/) · handoff files in [outputs/](outputs/) (`missing_report.csv`,
 > `outlier_candidates.csv`, `correlation_top.csv`, `collinear_pairs.csv`, `eda_summary.json`).
 
 ### B.0. Proposed folder structure (inside `EDA/`)
@@ -112,7 +112,8 @@ EDA/
 **Step 3 — Numeric variables** *(1 day)* — ✅ done
 - [x] Histogram + boxplot for key numeric variables (`GrLivArea`, `TotalBsmtSF`, `LotArea`, `1stFlrSF`, `GarageArea`…).
 - [x] Scatter **price vs area** (`GrLivArea` vs `SalePrice`) → catch this dataset's well-known outliers (2 homes >4000 sqft with very low prices). *(Id 524 & 1299)*
-- [x] **Export `outputs/outlier_candidates.csv` → handoff to Module 3.**
+- [x] **Systematic outlier scan** (IQR 1.5× + z-score) across 12 continuous features → 45 candidates (2 leverage + 43 multivariate). *(fig `03_outlier_scan`)*
+- [x] **Export `outputs/outlier_candidates.csv` → handoff to Module 3.** *(enriched: `n_outlier_flags`, `flagged_features`, `reason`)*
 
 **Step 4 — Correlation & multicollinearity** *(1 day)* — ✅ done
 - [x] Correlation heatmap across numeric variables and vs `SalePrice`.

@@ -67,28 +67,240 @@
     ]
   },
   "outliers": {
-    "ids": [
+    "method": "IQR 1.5x per feature (primary) + z-score |z|>3 (reference); multivariate = flagged on >= 3 features",
+    "leverage_ids": [
       524,
       1299
     ],
-    "detail": [
+    "n_candidates": 45,
+    "per_feature": [
       {
-        "Id": 524,
-        "GrLivArea": 4676,
-        "SalePrice": 184750,
-        "OverallQual": 10,
-        "Neighborhood": "Edwards",
-        "SaleCondition": "Partial",
-        "reason": "GrLivArea>4000 & SalePrice<300k (high-leverage outlier)"
+        "feature": "MasVnrArea",
+        "n_iqr": 96,
+        "pct_iqr": 6.58,
+        "n_zscore": 32,
+        "pct_zscore": 2.19,
+        "iqr_high": 415.0
       },
+      {
+        "feature": "LotFrontage",
+        "n_iqr": 88,
+        "pct_iqr": 6.03,
+        "n_zscore": 12,
+        "pct_zscore": 0.82,
+        "iqr_high": 111.5
+      },
+      {
+        "feature": "OpenPorchSF",
+        "n_iqr": 77,
+        "pct_iqr": 5.27,
+        "n_zscore": 27,
+        "pct_zscore": 1.85,
+        "iqr_high": 170.0
+      },
+      {
+        "feature": "LotArea",
+        "n_iqr": 69,
+        "pct_iqr": 4.73,
+        "n_zscore": 13,
+        "pct_zscore": 0.89,
+        "iqr_high": 17673.5
+      },
+      {
+        "feature": "TotalBsmtSF",
+        "n_iqr": 61,
+        "pct_iqr": 4.18,
+        "n_zscore": 10,
+        "pct_zscore": 0.68,
+        "iqr_high": 2052.0
+      },
+      {
+        "feature": "SalePrice",
+        "n_iqr": 61,
+        "pct_iqr": 4.18,
+        "n_zscore": 22,
+        "pct_zscore": 1.51,
+        "iqr_high": 340037.5
+      },
+      {
+        "feature": "WoodDeckSF",
+        "n_iqr": 32,
+        "pct_iqr": 2.19,
+        "n_zscore": 22,
+        "pct_zscore": 1.51,
+        "iqr_high": 420.0
+      },
+      {
+        "feature": "GrLivArea",
+        "n_iqr": 31,
+        "pct_iqr": 2.12,
+        "n_zscore": 16,
+        "pct_zscore": 1.1,
+        "iqr_high": 2747.6
+      },
+      {
+        "feature": "GarageArea",
+        "n_iqr": 21,
+        "pct_iqr": 1.44,
+        "n_zscore": 7,
+        "pct_zscore": 0.48,
+        "iqr_high": 938.2
+      },
+      {
+        "feature": "1stFlrSF",
+        "n_iqr": 20,
+        "pct_iqr": 1.37,
+        "n_zscore": 12,
+        "pct_zscore": 0.82,
+        "iqr_high": 2155.1
+      },
+      {
+        "feature": "BsmtFinSF1",
+        "n_iqr": 7,
+        "pct_iqr": 0.48,
+        "n_zscore": 6,
+        "pct_zscore": 0.41,
+        "iqr_high": 1780.6
+      },
+      {
+        "feature": "2ndFlrSF",
+        "n_iqr": 2,
+        "pct_iqr": 0.14,
+        "n_zscore": 4,
+        "pct_zscore": 0.27,
+        "iqr_high": 1820.0
+      }
+    ],
+    "top_candidates": [
       {
         "Id": 1299,
         "GrLivArea": 5642,
         "SalePrice": 160000,
+        "LotArea": 63887,
+        "TotalBsmtSF": 6110,
         "OverallQual": 10,
         "Neighborhood": "Edwards",
         "SaleCondition": "Partial",
-        "reason": "GrLivArea>4000 & SalePrice<300k (high-leverage outlier)"
+        "n_outlier_flags": 9,
+        "flagged_features": "GrLivArea,TotalBsmtSF,1stFlrSF,LotArea,GarageArea,MasVnrArea,BsmtFinSF1,OpenPorchSF,LotFrontage",
+        "reason": "leverage: huge GrLivArea sold cheap (recommend REMOVE)"
+      },
+      {
+        "Id": 524,
+        "GrLivArea": 4676,
+        "SalePrice": 184750,
+        "LotArea": 40094,
+        "TotalBsmtSF": 3138,
+        "OverallQual": 10,
+        "Neighborhood": "Edwards",
+        "SaleCondition": "Partial",
+        "n_outlier_flags": 8,
+        "flagged_features": "GrLivArea,TotalBsmtSF,1stFlrSF,LotArea,MasVnrArea,BsmtFinSF1,OpenPorchSF,LotFrontage",
+        "reason": "leverage: huge GrLivArea sold cheap (recommend REMOVE)"
+      },
+      {
+        "Id": 692,
+        "GrLivArea": 4316,
+        "SalePrice": 755000,
+        "LotArea": 21535,
+        "TotalBsmtSF": 2444,
+        "OverallQual": 10,
+        "Neighborhood": "NoRidge",
+        "SaleCondition": "Normal",
+        "n_outlier_flags": 7,
+        "flagged_features": "SalePrice,GrLivArea,TotalBsmtSF,1stFlrSF,2ndFlrSF,LotArea,MasVnrArea",
+        "reason": "multivariate: IQR-outlier on 7 features (review)"
+      },
+      {
+        "Id": 1183,
+        "GrLivArea": 4476,
+        "SalePrice": 745000,
+        "LotArea": 15623,
+        "TotalBsmtSF": 2396,
+        "OverallQual": 10,
+        "Neighborhood": "NoRidge",
+        "SaleCondition": "Abnorml",
+        "n_outlier_flags": 7,
+        "flagged_features": "SalePrice,GrLivArea,TotalBsmtSF,1stFlrSF,2ndFlrSF,BsmtFinSF1,LotFrontage",
+        "reason": "multivariate: IQR-outlier on 7 features (review)"
+      },
+      {
+        "Id": 179,
+        "GrLivArea": 2234,
+        "SalePrice": 501837,
+        "LotArea": 17423,
+        "TotalBsmtSF": 2216,
+        "OverallQual": 9,
+        "Neighborhood": "StoneBr",
+        "SaleCondition": "Partial",
+        "n_outlier_flags": 6,
+        "flagged_features": "SalePrice,TotalBsmtSF,1stFlrSF,GarageArea,MasVnrArea,BsmtFinSF1",
+        "reason": "multivariate: IQR-outlier on 6 features (review)"
+      },
+      {
+        "Id": 1170,
+        "GrLivArea": 3627,
+        "SalePrice": 625000,
+        "LotArea": 35760,
+        "TotalBsmtSF": 1930,
+        "OverallQual": 10,
+        "Neighborhood": "NoRidge",
+        "SaleCondition": "Normal",
+        "n_outlier_flags": 5,
+        "flagged_features": "SalePrice,GrLivArea,LotArea,MasVnrArea,LotFrontage",
+        "reason": "multivariate: IQR-outlier on 5 features (review)"
+      },
+      {
+        "Id": 899,
+        "GrLivArea": 2364,
+        "SalePrice": 611657,
+        "LotArea": 12919,
+        "TotalBsmtSF": 2330,
+        "OverallQual": 9,
+        "Neighborhood": "NridgHt",
+        "SaleCondition": "Partial",
+        "n_outlier_flags": 5,
+        "flagged_features": "SalePrice,TotalBsmtSF,1stFlrSF,MasVnrArea,BsmtFinSF1",
+        "reason": "multivariate: IQR-outlier on 5 features (review)"
+      },
+      {
+        "Id": 770,
+        "GrLivArea": 3279,
+        "SalePrice": 538000,
+        "LotArea": 53504,
+        "TotalBsmtSF": 1650,
+        "OverallQual": 8,
+        "Neighborhood": "StoneBr",
+        "SaleCondition": "Normal",
+        "n_outlier_flags": 5,
+        "flagged_features": "SalePrice,GrLivArea,LotArea,MasVnrArea,WoodDeckSF",
+        "reason": "multivariate: IQR-outlier on 5 features (review)"
+      },
+      {
+        "Id": 665,
+        "GrLivArea": 2097,
+        "SalePrice": 423000,
+        "LotArea": 20896,
+        "TotalBsmtSF": 2077,
+        "OverallQual": 8,
+        "Neighborhood": "Somerst",
+        "SaleCondition": "Partial",
+        "n_outlier_flags": 5,
+        "flagged_features": "SalePrice,TotalBsmtSF,LotArea,GarageArea,OpenPorchSF",
+        "reason": "multivariate: IQR-outlier on 5 features (review)"
+      },
+      {
+        "Id": 225,
+        "GrLivArea": 2392,
+        "SalePrice": 386250,
+        "LotArea": 13472,
+        "TotalBsmtSF": 2392,
+        "OverallQual": 10,
+        "Neighborhood": "NridgHt",
+        "SaleCondition": "Normal",
+        "n_outlier_flags": 5,
+        "flagged_features": "SalePrice,TotalBsmtSF,1stFlrSF,GarageArea,MasVnrArea",
+        "reason": "multivariate: IQR-outlier on 5 features (review)"
       }
     ]
   },

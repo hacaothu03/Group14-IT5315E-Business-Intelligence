@@ -18,7 +18,7 @@ Source: `data/train.csv` (1460 rows × 81 columns) · Notebook: [01_eda.ipynb](0
 | Columns with missing data | **19**, of which only **3** are genuine | Most `NA` = "feature absent", not a data error |
 | Strongest driver | **`OverallQual`** (r = **0.79**) | Quality dominates price |
 | Cheapest → priciest neighborhood (median) | **3.58×** ($88k → $315k) | Location is a must-keep feature |
-| High-leverage outliers | **Id 524 & 1299** | Remove before modelling |
+| Outlier candidates (IQR scan) | **45 rows** (2 leverage + 43 multivariate) | Remove the 2 leverage; review the rest |
 
 ---
 
@@ -42,13 +42,21 @@ drop the rows**.
 → **Handoff to Module 3:** [outputs/missing_report.csv](outputs/missing_report.csv) (with the `na_meaning` column).
 📊 [figures/02_missing_values.png](figures/02_missing_values.png)
 
-### 3. Two high-leverage outliers must be removed
-`Id 524` (GrLivArea **4676** sqft, sold **\$184,750**) and `Id 1299` (GrLivArea **5642** sqft, sold **\$160,000**)
-are the two largest homes in the data yet sold far below trend. Both have `OverallQual = 10`, are in
-**Edwards**, and are **`Partial`** sales (unfinished when assessed) — which explains the low price. They distort
-any linear fit.
-→ **Handoff to Module 3:** drop or down-weight — [outputs/outlier_candidates.csv](outputs/outlier_candidates.csv).
-📊 [figures/03_grlivarea_vs_saleprice.png](figures/03_grlivarea_vs_saleprice.png)
+### 3. Outliers: 2 leverage points to remove, + 45 candidates to review
+A **systematic scan** (IQR 1.5× as primary, robust to skew; z-score `|z|>3` as reference) across 12 continuous
+features, counting how many features flag each row:
+- **High-leverage → remove:** `Id 524` (GrLivArea **4676** sqft, **\$184,750**) and `Id 1299` (GrLivArea
+  **5642** sqft, **\$160,000**) — the two largest homes, both `OverallQual 10` in **Edwards**, both **`Partial`**
+  sales. They sit far below trend and distort any linear fit.
+- **Multivariate candidates → review (don't blindly drop):** 43 more rows are IQR-outliers on **≥ 3** features
+  (of 1460, only 45 rows total cross that bar). Most are **genuine luxury homes** (NoRidge / StoneBr / NridgHt,
+  \$500k–\$755k) — valid data, not errors.
+- **Most outlier-prone features:** `MasVnrArea` (96), `LotFrontage` (88), `OpenPorchSF` (77), `LotArea` (69) —
+  all heavy right tails.
+
+→ **Handoff to Module 3:** 45 rows with `n_outlier_flags`, `flagged_features`, `reason` in
+[outputs/outlier_candidates.csv](outputs/outlier_candidates.csv).
+📊 [figures/03_grlivarea_vs_saleprice.png](figures/03_grlivarea_vs_saleprice.png) · [figures/03_outlier_scan.png](figures/03_outlier_scan.png)
 
 ### 4. `OverallQual` is the single strongest driver
 Correlation with `SalePrice` = **0.79**. Median price climbs steeply and **non-linearly** with quality:
@@ -122,7 +130,7 @@ levels — a secondary effect worth one-hot encoding.
 | File | For | Contents |
 |------|-----|----------|
 | [outputs/missing_report.csv](outputs/missing_report.csv) | **Module 3** | 19 columns × (`n_missing`, `pct_missing`, `na_meaning`) |
-| [outputs/outlier_candidates.csv](outputs/outlier_candidates.csv) | **Module 3** | Id 524 & 1299 with context + reason |
+| [outputs/outlier_candidates.csv](outputs/outlier_candidates.csv) | **Module 3** | 45 candidates (2 leverage + 43 multivariate IQR) with `n_outlier_flags`, `flagged_features`, `reason` |
 | [outputs/correlation_top.csv](outputs/correlation_top.csv) | **Module 4** | All features ranked by \|corr\| with `SalePrice` |
 | [outputs/collinear_pairs.csv](outputs/collinear_pairs.csv) | **Module 4** | 10 predictor pairs with \|r\| ≥ 0.70 |
 | [outputs/eda_summary.json](outputs/eda_summary.json) | all | Machine-readable digest of every number above |
@@ -134,7 +142,7 @@ levels — a secondary effect worth one-hot encoding.
 **For Module 3 (cleaning)**
 1. Fill "structural NA" columns with `"None"`/`0`; keep the rows.
 2. Impute the 3 genuine-missing columns: `LotFrontage` (neighborhood median), `MasVnrArea` (0), `Electrical` (mode).
-3. Remove/down-weight outliers `Id 524` and `Id 1299`.
+3. Remove the 2 leverage outliers (`Id 524`, `Id 1299`); review the other 43 IQR candidates but keep genuine luxury homes.
 
 **For Module 4 (feature engineering)**
 1. Model target = `log(SalePrice)`.
