@@ -434,8 +434,8 @@
     "mortgage_one_rate_per_month": true,
     "notes": {
       "DistanceToCenter": "strong +corr but proxy for Neighborhood (cheap old downtown near center, premium developments on edge); collinear with location",
-      "MortgageRate": "macro/time variable, ~0 cross-sectional corr; function of YrSold+MoSold",
-      "DaysOnMarket": "positive, non-linear vs price (luxury homes listed longer); days-on-market as of the data snapshot, provided in the test set -> known at prediction time, KEEP (document assumption + run ablation)",
+      "MortgageRate": "REAL Freddie Mac 30-yr fixed rate joined by (YrSold,MoSold); every home WAS sold, so this is the true borrowing cost at each sale. Cross-sectional r~0 (0.03) only because all homes in a given sale-month share one rate -> NOT noise but a genuine macro/time signal (rates fell ~6.7%->4.6% over 2006-2010); keep as a temporal/macro feature",
+      "DaysOnMarket": "days a listing had been on the market at the point of sale -> observable at prediction time, KEEP. Positive but NON-MONOTONIC (U-shaped) vs price: by construction a U-curve in OverallQual (min ~5.5) and GrLivArea (min ~1500 sqft) + noise, so mid-market sells fastest while BOTH low-quality/small AND luxury/large homes sit longer. r=+0.52 comes from the high-quality branch, not causal. Mechanically a function of OverallQual+GrLivArea -> run an ablation",
       "AgeAtSale/YearsSinceRemodel": "derived; reconfirm the Step-5 age effect (r ~ -0.5)"
     }
   },
