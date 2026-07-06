@@ -1,0 +1,136 @@
+{
+  "raw_shape": {
+    "train": [
+      1460,
+      86
+    ],
+    "test": [
+      1459,
+      86
+    ]
+  },
+  "clean_shape": {
+    "train": [
+      1458,
+      86
+    ],
+    "test": [
+      1459,
+      86
+    ]
+  },
+  "input_files": {
+    "train": "data-v2\\train.csv",
+    "test": "data-v2\\test.csv"
+  },
+  "augmented_features": {
+    "available_columns": [
+      "AgeAtSale",
+      "YearsSinceRemodel",
+      "MortgageRate",
+      "DaysOnMarket",
+      "DistanceToCenter"
+    ],
+    "handling": {},
+    "validation": {
+      "train": {
+        "AgeAtSaleMismatch": 0,
+        "NegativeAgeAtSale": 0,
+        "YearsSinceRemodelMismatch": 0,
+        "NegativeYearsSinceRemodel": 0,
+        "MortgageRateMonthPairsWithMultipleRates": 0
+      },
+      "test": {
+        "AgeAtSaleMismatch": 0,
+        "NegativeAgeAtSale": 1,
+        "YearsSinceRemodelMismatch": 0,
+        "NegativeYearsSinceRemodel": 2,
+        "MortgageRateMonthPairsWithMultipleRates": 0
+      }
+    }
+  },
+  "missing_before": {
+    "train": {
+      "PoolQC": 1453,
+      "MiscFeature": 1406,
+      "Alley": 1369,
+      "Fence": 1179,
+      "MasVnrType": 872,
+      "FireplaceQu": 690,
+      "LotFrontage": 259,
+      "GarageCond": 81,
+      "GarageYrBlt": 81,
+      "GarageFinish": 81,
+      "GarageQual": 81,
+      "GarageType": 81,
+      "BsmtExposure": 38,
+      "BsmtFinType2": 38,
+      "BsmtFinType1": 37,
+      "BsmtCond": 37,
+      "BsmtQual": 37,
+      "MasVnrArea": 8,
+      "Electrical": 1
+    },
+    "test": {
+      "PoolQC": 1456,
+      "MiscFeature": 1408,
+      "Alley": 1352,
+      "Fence": 1169,
+      "MasVnrType": 894,
+      "FireplaceQu": 730,
+      "LotFrontage": 227,
+      "GarageCond": 78,
+      "GarageFinish": 78,
+      "GarageYrBlt": 78,
+      "GarageQual": 78,
+      "GarageType": 76,
+      "BsmtCond": 45,
+      "BsmtQual": 44,
+      "BsmtExposure": 44,
+      "BsmtFinType1": 42,
+      "BsmtFinType2": 42,
+      "MasVnrArea": 15,
+      "MSZoning": 4,
+      "Utilities": 2,
+      "BsmtHalfBath": 2,
+      "BsmtFullBath": 2,
+      "Functional": 2,
+      "TotalBsmtSF": 1,
+      "KitchenQual": 1,
+      "BsmtFinSF1": 1,
+      "GarageCars": 1,
+      "GarageArea": 1,
+      "Exterior1st": 1,
+      "SaleType": 1,
+      "Exterior2nd": 1,
+      "BsmtUnfSF": 1,
+      "BsmtFinSF2": 1
+    }
+  },
+  "missing_after": {
+    "train": {},
+    "test": {}
+  },
+  "duplicate_ids_before": {
+    "train": 0,
+    "test": 0
+  },
+  "removed_training_outliers": {
+    "rule": "(GrLivArea > 4000) & (SalePrice < 300000)",
+    "count": 2,
+    "ids": [
+      524,
+      1299
+    ]
+  },
+  "imputations": {
+    "MSZoning": "RL",
+    "Utilities": "AllPub",
+    "Exterior1st": "VinylSd",
+    "Exterior2nd": "VinylSd",
+    "Electrical": "SBrkr",
+    "KitchenQual": "TA",
+    "Functional": "Typ",
+    "SaleType": "WD"
+  }
+}
