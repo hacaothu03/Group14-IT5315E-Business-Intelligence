@@ -1,7 +1,8 @@
 # EDA Findings — House Prices (Ames, Iowa)
 
 **Module 2 · Branch `hacao` · Data Analyst**
-Source: `data/train.csv` (1460 rows × 81 columns) · Notebook: [01_eda.ipynb](01_eda.ipynb)
+Source: `data/kaggle_data/train.csv` (1460 rows × 81 cols) for Steps 0–5,7 · `data/final_data/train_v2.csv`
+(+5 supplementary cols) for Step 6 · Notebook: [01_eda.ipynb](01_eda.ipynb)
 
 > Written insight summary for **Module 8** (report/slides) and a **handoff** to **Module 3** (cleaning) and
 > **Module 4** (feature engineering). Every insight below links to a chart in [figures/](figures/) and, where
@@ -125,6 +126,33 @@ levels — a secondary effect worth one-hot encoding.
 
 ---
 
+## Step 6 — Supplementary (synthetic) data
+
+Module 1's five extra columns (from [../data/final_data/train_v2.csv](../data/final_data/train_v2.csv)) were
+profiled for plausibility and correlated with `SalePrice`. Two are **derived**, one is **macro**, two are
+**simulated**:
+
+| Feature | Type | r with `SalePrice` | Verdict / handoff |
+|---|---|---|---|
+| `DistanceToCenter` | simulated | **+0.58** | Strong, but a **proxy for `Neighborhood`** (Spearman **0.78** with neighborhood median) — cheap old downtown is *near* center, premium developments on the *edge*. **Collinear with location; use one, not both.** |
+| `DaysOnMarket` | simulated | **+0.52** | Positive & non-linear (luxury homes listed longer). Days-on-market **as of the data snapshot** and **present in the test set** → known at prediction time, **keep it** (document the assumption + run an ablation). |
+| `AgeAtSale` | derived | **−0.52** | Reconfirms the age effect (= insight #9); already a recommended derived feature. |
+| `YearsSinceRemodel` | derived | **−0.51** | Same signal as `Age`; keep one. |
+| `MortgageRate` | macro | **+0.03** | **~No cross-sectional signal** — a time variable (one rate per sale month, 6.7%→4.6% over 2006–2010, a function of `YrSold`/`MoSold`). Keep for macro/temporal framing only. |
+
+**Plausibility:** all derived identities hold 100%, `MortgageRate` is one value per (year, month), no nulls;
+`YearsSinceRemodel` has 1 mildly negative value (inherited Ames quirk, kept as-is).
+→ **Handoff to Module 4/5:** the derived/distance features are largely **redundant with existing signals**
+(`DistanceToCenter` ↔ `Neighborhood`; `Age`/`YearsSinceRemodel` ↔ years). `DaysOnMarket` is a **data-snapshot
+value known at prediction time** (present in the test set) → **keep it, but document the assumption and run an
+ablation** (with/without) to confirm it is not over-contributing. Full digest in
+[outputs/eda_summary.json](outputs/eda_summary.json) → `synthetic`.
+📊 [figures/06_supplementary_distributions.png](figures/06_supplementary_distributions.png) ·
+[figures/06_supplementary_correlations.png](figures/06_supplementary_correlations.png) ·
+[figures/06_supplementary_relationships.png](figures/06_supplementary_relationships.png)
+
+---
+
 ## Handoff files
 
 | File | For | Contents |
@@ -150,13 +178,18 @@ levels — a secondary effect worth one-hot encoding.
 3. Resolve the 10 collinear pairs (keep one each) and avoid the `GrLivArea`/`1stFlrSF`/`2ndFlrSF` VIF trap.
 4. Add derived features: `Age`, `YearsSinceRemod`, `TotalSF` (= `TotalBsmtSF` + `1stFlrSF` + `2ndFlrSF`), `HasPool`.
 5. Encode `Neighborhood` by median price (strong, 3.6× spread).
+6. Supplementary columns (`data/final_data/train_v2.csv`): `DistanceToCenter` is collinear with `Neighborhood`
+   (keep one); `MortgageRate` is a macro/time proxy only; **keep `DaysOnMarket`** (known at prediction time as a
+   data-snapshot value, present in the test set) but **document the assumption and run an ablation**.
 
 ---
 
 ## Open items
 
-- **Step 6 — synthetic data (pending Module 1).** Once the amenity-score / days-on-market / macro-indicator
-  data is delivered, add a section to (a) check the plausibility of those distributions and (b) plot
-  `SalePrice` vs distance-to-amenities, then re-run [01_eda.ipynb](01_eda.ipynb) and update this summary.
+- **Step 6 — supplementary data: ✅ done.** The days-on-market / macro-rate / distance-to-center columns from
+  Module 1 have been profiled and correlated with `SalePrice` (see the Step 6 section above). Main takeaway:
+  the strong synthetic signals are **collinear with existing features**; `DaysOnMarket` is a **data-snapshot
+  value known at prediction time** (present in the test set) → **kept, with an assumption note + ablation
+  recommendation**.
 
 *See the full analysis and all charts in [01_eda.ipynb](01_eda.ipynb). Data dictionary: [DATA_DICTIONARY_EN.md](DATA_DICTIONARY_EN.md) / [DATA_DICTIONARY_VI.md](DATA_DICTIONARY_VI.md).*
