@@ -415,10 +415,35 @@
     "9": 345000.0,
     "10": 432390.0
   },
+  "synthetic": {
+    "columns": [
+      "AgeAtSale",
+      "YearsSinceRemodel",
+      "MortgageRate",
+      "DaysOnMarket",
+      "DistanceToCenter"
+    ],
+    "corr_with_saleprice": {
+      "AgeAtSale": -0.523,
+      "YearsSinceRemodel": -0.509,
+      "MortgageRate": 0.028,
+      "DaysOnMarket": 0.521,
+      "DistanceToCenter": 0.581
+    },
+    "distance_neighborhood_spearman": 0.776,
+    "mortgage_one_rate_per_month": true,
+    "notes": {
+      "DistanceToCenter": "strong +corr but proxy for Neighborhood (cheap old downtown near center, premium developments on edge); collinear with location",
+      "MortgageRate": "macro/time variable, ~0 cross-sectional corr; function of YrSold+MoSold",
+      "DaysOnMarket": "positive, non-linear vs price (luxury homes listed longer); days-on-market as of the data snapshot, provided in the test set -> known at prediction time, KEEP (document assumption + run ablation)",
+      "AgeAtSale/YearsSinceRemodel": "derived; reconfirm the Step-5 age effect (r ~ -0.5)"
+    }
+  },
   "handoff_files": {
     "missing_report.csv": "columns with missing values + NA-meaning  (-> Module 3)",
     "outlier_candidates.csv": "high-leverage outliers to review          (-> Module 3)",
     "correlation_top.csv": "features ranked by |corr| with SalePrice  (-> Module 4)",
-    "collinear_pairs.csv": "predictor pairs with |corr| >= 0.70       (-> Module 4)"
+    "collinear_pairs.csv": "predictor pairs with |corr| >= 0.70       (-> Module 4)",
+    "(Step 6)": "supplementary-feature findings recorded in SUMMARY[\"synthetic\"] (-> Modules 4/5)"
   }
 }
