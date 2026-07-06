@@ -131,7 +131,7 @@ EDA/
 **Step 6 — Analyze the supplementary data** *(0.5 day)* — ✅ done
 - [x] Checked distributions/plausibility of the 5 supplementary variables (`AgeAtSale`, `YearsSinceRemodel`, `MortgageRate`, `DaysOnMarket`, `DistanceToCenter`). *(3 charts: 06_*)*
 - [x] Scatter **price vs distance-to-center** + distance↔neighborhood proxy. *(DistanceToCenter r +0.58; Spearman 0.78 vs neighborhood median)*
-- [x] Verified the synthetic ↔ `SalePrice` directions: `DistanceToCenter` collinear with `Neighborhood`; `MortgageRate` is macro/time-only (r ≈ 0.03); `DaysOnMarket` positive & **known at prediction time** (data-snapshot value, present in the test set) → **keep with assumption note + ablation**. → flagged to Modules 4/5.
+- [x] Verified the synthetic ↔ `SalePrice` directions: `DistanceToCenter` collinear with `Neighborhood`; `MortgageRate` is a **real** Freddie Mac rate joined by sale date — a genuine macro/time feature (cross-sectional r ≈ 0.03 is expected, not noise); `DaysOnMarket` is **observable at prediction time** but a **U-shaped** function of `OverallQual`+`GrLivArea` (mid-market sells fastest; both cheap/small and luxury/large sit longer) → **keep with ablation**. → flagged to Modules 4/5.
 
 **Step 7 — Synthesis & handoff** *(0.5 day)* — ✅ done (PR optional)
 - [x] Write `EDA_FINDINGS.md`: 8–12 key insights, each with a one-line business meaning + chart link. *(10 insights + Step 6 section)*
