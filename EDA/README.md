@@ -67,11 +67,12 @@ data + dictionary           outliers, multicollinearity     outliers & missing  
 
 ## PART B — EDA EXECUTION PLAN
 
-> ### ✅ Execution status (updated 2026-07-04)
-> Steps 0–5 and 7 are **done** on the Kaggle base. Step 6 (synthetic data) is **pending Module 1**.
-> Deliverables: notebook [01_eda.ipynb](01_eda.ipynb) · written insights [EDA_FINDINGS.md](EDA_FINDINGS.md) ·
-> 11 charts in [figures/](figures/) · handoff files in [outputs/](outputs/) (`missing_report.csv`,
-> `outlier_candidates.csv`, `correlation_top.csv`, `collinear_pairs.csv`, `eda_summary.json`).
+> ### ✅ Execution status (updated 2026-07-06)
+> **All steps 0–7 are done**, including **Step 6** on the supplementary data (`data/final_data/train_v2.csv`).
+> Base data now lives in `data/kaggle_data/`. Deliverables: notebook [01_eda.ipynb](01_eda.ipynb) · written
+> insights [EDA_FINDINGS.md](EDA_FINDINGS.md) · 14 charts in [figures/](figures/) · handoff files in
+> [outputs/](outputs/) (`missing_report.csv`, `outlier_candidates.csv`, `correlation_top.csv`,
+> `collinear_pairs.csv`, `eda_summary.json` with a `synthetic` block).
 
 ### B.0. Proposed folder structure (inside `EDA/`)
 ```
@@ -127,14 +128,14 @@ EDA/
 - [x] **`SalePrice` by property age**: create a temp `Age = YrSold − YearBuilt`, scatter/binned line → price vs age. *(corr −0.52)*
 - [x] Boxplot by `OverallQual` (a very strong driver). *(median $50k→$432k across qual 1→10)*
 
-**Step 6 — Analyze the synthetic data (once Module 1 is done)** *(0.5 day)*
-- [ ] Check the distributions of synthetic variables (amenity score, days-on-market, interest rate…) for plausibility.
-- [ ] Scatter **price vs distance-to-amenities** (as the brief suggests).
-- [ ] Verify the synthetic ↔ `SalePrice` correlations point the expected business direction (closer to school/hospital → higher price?). → feed back to Module 1 if the generation logic looks unrealistic.
+**Step 6 — Analyze the supplementary data** *(0.5 day)* — ✅ done
+- [x] Checked distributions/plausibility of the 5 supplementary variables (`AgeAtSale`, `YearsSinceRemodel`, `MortgageRate`, `DaysOnMarket`, `DistanceToCenter`). *(3 charts: 06_*)*
+- [x] Scatter **price vs distance-to-center** + distance↔neighborhood proxy. *(DistanceToCenter r +0.58; Spearman 0.78 vs neighborhood median)*
+- [x] Verified the synthetic ↔ `SalePrice` directions: `DistanceToCenter` collinear with `Neighborhood`; `MortgageRate` is a **real** Freddie Mac rate joined by sale date — a genuine macro/time feature (cross-sectional r ≈ 0.03 is expected, not noise); `DaysOnMarket` is **observable at prediction time** but a **U-shaped** function of `OverallQual`+`GrLivArea` (mid-market sells fastest; both cheap/small and luxury/large sit longer) → **keep with ablation**. → flagged to Modules 4/5.
 
 **Step 7 — Synthesis & handoff** *(0.5 day)* — ✅ done (PR optional)
-- [x] Write `EDA_FINDINGS.md`: 8–12 key insights, each with a one-line business meaning + chart link. *(10 insights)*
-- [x] Export all key charts to `figures/` (reused by Module 8 for slides/report). *(10 charts)*
+- [x] Write `EDA_FINDINGS.md`: 8–12 key insights, each with a one-line business meaning + chart link. *(10 insights + Step 6 section)*
+- [x] Export all key charts to `figures/` (reused by Module 8 for slides/report). *(14 charts)*
 - [x] Finalize the files in `outputs/` for Modules 3 & 4. *(+ `collinear_pairs.csv`, `eda_summary.json`)*
 - [x] Commit & push branch `hacao`. *(open a PR when the team is ready)*
 

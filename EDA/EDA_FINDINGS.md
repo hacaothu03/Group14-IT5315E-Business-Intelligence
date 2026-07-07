@@ -1,7 +1,8 @@
 # EDA Findings — House Prices (Ames, Iowa)
 
 **Module 2 · Branch `hacao` · Data Analyst**
-Source: `data/train.csv` (1460 rows × 81 columns) · Notebook: [01_eda.ipynb](01_eda.ipynb)
+Source: `data/kaggle_data/train.csv` (1460 rows × 81 cols) for Steps 0–5,7 · `data/final_data/train_v2.csv`
+(+5 supplementary cols) for Step 6 · Notebook: [01_eda.ipynb](01_eda.ipynb)
 
 > Written insight summary for **Module 8** (report/slides) and a **handoff** to **Module 3** (cleaning) and
 > **Module 4** (feature engineering). Every insight below links to a chart in [figures/](figures/) and, where
@@ -125,6 +126,34 @@ levels — a secondary effect worth one-hot encoding.
 
 ---
 
+## Step 6 — Supplementary (synthetic) data
+
+Module 1's five extra columns (from [../data/final_data/train_v2.csv](../data/final_data/train_v2.csv)) were
+profiled for plausibility and correlated with `SalePrice`. Two are **derived**, one is a **real macro series
+joined by sale date**, two are **simulated**:
+
+| Feature | Type | r with `SalePrice` | Verdict / handoff |
+|---|---|---|---|
+| `DistanceToCenter` | simulated | **+0.58** | Strong, but a **proxy for `Neighborhood`** (Spearman **0.78** with neighborhood median) — cheap old downtown is *near* center, premium developments on the *edge*. **Collinear with location; use one, not both.** |
+| `DaysOnMarket` | simulated | **+0.52** | Days a listing had been on the market **at the point of sale** → **observable at prediction time**, so keep it. The relationship is **positive but non-monotonic (U-shaped)**: by construction a U-curve in `OverallQual` (min ~5.5) + `GrLivArea` (min ~1,500) + noise — **mid-market sells fastest; both low-quality/small *and* luxury/large homes sit longer**. The +0.52 is the high-quality branch, not causal. Mechanically a function of `OverallQual`+`GrLivArea` → run an ablation. |
+| `AgeAtSale` | derived | **−0.52** | Reconfirms the age effect (= insight #9); already a recommended derived feature. |
+| `YearsSinceRemodel` | derived | **−0.51** | Same signal as `Age`; keep one. |
+| `MortgageRate` | real macro | **+0.03** | **Real** Freddie Mac 30-yr fixed rate joined to each sale's actual month/year (every home *was* sold, so it is the genuine borrowing cost at each transaction). Cross-sectional r ≈ 0 **only because all homes in a given sale-month share one rate** — this is *not* noise. Across **time** it is a real macro signal (6.7%→4.6% over 2006–2010). **Keep as a temporal/macro feature.** |
+
+**Plausibility:** all derived identities hold 100%, `MortgageRate` is one value per (year, month), no nulls;
+`YearsSinceRemodel` has 1 mildly negative value (inherited Ames quirk, kept as-is).
+→ **Handoff to Module 4/5:** `DistanceToCenter` is largely **redundant with `Neighborhood`** and `Age`/
+`YearsSinceRemodel` with the year features (keep one of each). `MortgageRate` is a genuine **macro/time**
+feature — keep it for time-aware modelling (don't expect cross-sectional lift). `DaysOnMarket` is
+**observable at prediction time** → **keep it**, but because it is mechanically a U-shaped function of
+`OverallQual`+`GrLivArea`, **run an ablation** (with/without) to confirm it adds signal beyond those two. Full
+digest in [outputs/eda_summary.json](outputs/eda_summary.json) → `synthetic`.
+📊 [figures/06_supplementary_distributions.png](figures/06_supplementary_distributions.png) ·
+[figures/06_supplementary_correlations.png](figures/06_supplementary_correlations.png) ·
+[figures/06_supplementary_relationships.png](figures/06_supplementary_relationships.png)
+
+---
+
 ## Handoff files
 
 | File | For | Contents |
@@ -150,13 +179,20 @@ levels — a secondary effect worth one-hot encoding.
 3. Resolve the 10 collinear pairs (keep one each) and avoid the `GrLivArea`/`1stFlrSF`/`2ndFlrSF` VIF trap.
 4. Add derived features: `Age`, `YearsSinceRemod`, `TotalSF` (= `TotalBsmtSF` + `1stFlrSF` + `2ndFlrSF`), `HasPool`.
 5. Encode `Neighborhood` by median price (strong, 3.6× spread).
+6. Supplementary columns (`data/final_data/train_v2.csv`): `DistanceToCenter` is collinear with `Neighborhood`
+   (keep one); `MortgageRate` is a genuine **macro/time** feature (real Freddie Mac rate by sale date — keep for
+   time-aware modelling, ~0 cross-sectional corr is expected, not noise); **keep `DaysOnMarket`** (observable at
+   prediction time) but note it is a U-shaped function of `OverallQual`+`GrLivArea` and **run an ablation**.
 
 ---
 
 ## Open items
 
-- **Step 6 — synthetic data (pending Module 1).** Once the amenity-score / days-on-market / macro-indicator
-  data is delivered, add a section to (a) check the plausibility of those distributions and (b) plot
-  `SalePrice` vs distance-to-amenities, then re-run [01_eda.ipynb](01_eda.ipynb) and update this summary.
+- **Step 6 — supplementary data: ✅ done.** The days-on-market / macro-rate / distance-to-center columns from
+  Module 1 have been profiled and correlated with `SalePrice` (see the Step 6 section above). Main takeaway:
+  the strong synthetic signals are **collinear with existing features** (`DistanceToCenter` ↔ `Neighborhood`);
+  `MortgageRate` is a **real macro/time** feature (keep for time-aware modelling); `DaysOnMarket` is
+  **observable at prediction time** → **kept**, but it is a U-shaped function of `OverallQual`+`GrLivArea`, so
+  an **ablation** is recommended.
 
 *See the full analysis and all charts in [01_eda.ipynb](01_eda.ipynb). Data dictionary: [DATA_DICTIONARY_EN.md](DATA_DICTIONARY_EN.md) / [DATA_DICTIONARY_VI.md](DATA_DICTIONARY_VI.md).*

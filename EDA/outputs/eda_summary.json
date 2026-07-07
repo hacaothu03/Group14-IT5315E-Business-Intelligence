@@ -415,10 +415,35 @@
     "9": 345000.0,
     "10": 432390.0
   },
+  "synthetic": {
+    "columns": [
+      "AgeAtSale",
+      "YearsSinceRemodel",
+      "MortgageRate",
+      "DaysOnMarket",
+      "DistanceToCenter"
+    ],
+    "corr_with_saleprice": {
+      "AgeAtSale": -0.523,
+      "YearsSinceRemodel": -0.509,
+      "MortgageRate": 0.028,
+      "DaysOnMarket": 0.521,
+      "DistanceToCenter": 0.581
+    },
+    "distance_neighborhood_spearman": 0.776,
+    "mortgage_one_rate_per_month": true,
+    "notes": {
+      "DistanceToCenter": "strong +corr but proxy for Neighborhood (cheap old downtown near center, premium developments on edge); collinear with location",
+      "MortgageRate": "REAL Freddie Mac 30-yr fixed rate joined by (YrSold,MoSold); every home WAS sold, so this is the true borrowing cost at each sale. Cross-sectional r~0 (0.03) only because all homes in a given sale-month share one rate -> NOT noise but a genuine macro/time signal (rates fell ~6.7%->4.6% over 2006-2010); keep as a temporal/macro feature",
+      "DaysOnMarket": "days a listing had been on the market at the point of sale -> observable at prediction time, KEEP. Positive but NON-MONOTONIC (U-shaped) vs price: by construction a U-curve in OverallQual (min ~5.5) and GrLivArea (min ~1500 sqft) + noise, so mid-market sells fastest while BOTH low-quality/small AND luxury/large homes sit longer. r=+0.52 comes from the high-quality branch, not causal. Mechanically a function of OverallQual+GrLivArea -> run an ablation",
+      "AgeAtSale/YearsSinceRemodel": "derived; reconfirm the Step-5 age effect (r ~ -0.5)"
+    }
+  },
   "handoff_files": {
     "missing_report.csv": "columns with missing values + NA-meaning  (-> Module 3)",
     "outlier_candidates.csv": "high-leverage outliers to review          (-> Module 3)",
     "correlation_top.csv": "features ranked by |corr| with SalePrice  (-> Module 4)",
-    "collinear_pairs.csv": "predictor pairs with |corr| >= 0.70       (-> Module 4)"
+    "collinear_pairs.csv": "predictor pairs with |corr| >= 0.70       (-> Module 4)",
+    "(Step 6)": "supplementary-feature findings recorded in SUMMARY[\"synthetic\"] (-> Modules 4/5)"
   }
 }
