@@ -1,0 +1,3 @@
+model,best_cv_log_rmse,n_iter,cv_splits,best_params
+random_forest_tuned,0.13347808524789953,12,3,"{'model__n_estimators': 600, 'model__min_samples_split': 2, 'model__min_samples_leaf': 1, 'model__max_features': 'sqrt', 'model__max_depth': 20}"
+xgboost_tuned,0.12015339992774188,12,3,"{'model__subsample': 1.0, 'model__reg_lambda': 5, 'model__n_estimators': 800, 'model__min_child_weight': 5, 'model__max_depth': 3, 'model__learning_rate': 0.05, 'model__colsample_bytree': 0.75}"

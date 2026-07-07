@@ -22,18 +22,34 @@ else:
     MODEL_DIR = Path("models")
     SUBMISSION_DIR = Path("submissions")
 
+CLEANDATA_DIR = Path("CleanData")
+CLEANDATA_V2_DIR = CLEANDATA_DIR / "data-v2"
+CLEANDATA_PROCESSED_DIR = CLEANDATA_V2_DIR / "processed"
 PROCESSED_DIR = Path("data/processed")
 DEFAULT_CLEANED_TRAIN_PATHS = [
+    CLEANDATA_PROCESSED_DIR / "train_cleaned.csv",
+    CLEANDATA_V2_DIR / "train.csv",
+    Path("data/final_data/train_v2.csv"),
     PROCESSED_DIR / "train_cleaned.csv",
     Path("data/train_cleaned.csv"),
 ]
 DEFAULT_TEST_PATHS = [
+    CLEANDATA_PROCESSED_DIR / "test_cleaned.csv",
+    CLEANDATA_V2_DIR / "test.csv",
+    Path("data/final_data/test_v2.csv"),
     PROCESSED_DIR / "test_cleaned.csv",
     Path("data/test_cleaned.csv"),
+    Path("data/kaggle_data/test.csv"),
+]
+RAW_TRAIN_PATHS = [
+    Path("data/kaggle_data/train.csv"),
+    Path("data/train.csv"),
+]
+RAW_TEST_PATHS = [
+    Path("data/kaggle_data/test.csv"),
     Path("data/test.csv"),
 ]
-RAW_TRAIN_PATH = Path("data/train.csv")
-SAMPLE_SUBMISSION_PATH = Path("data/sample_submission.csv")
+SAMPLE_SUBMISSION_PATH = Path("CleanData/data-v2/sample_submission.csv")
 CONTEXT_SOURCE_PATH = Path("data/housing_initial_data.csv")
 
 STRUCTURAL_CATEGORICAL_COLUMNS = [
@@ -68,11 +84,12 @@ STRUCTURAL_NUMERIC_COLUMNS = [
     "pool_area",
 ]
 
-QUALITY_MAPPING = {"None": 0, "NA": 0, "Po": 1, "Fa": 2, "TA": 3, "Gd": 4, "Ex": 5}
-BASEMENT_EXPOSURE_MAPPING = {"None": 0, "NA": 0, "No": 1, "Mn": 2, "Av": 3, "Gd": 4}
+QUALITY_MAPPING = {"None": 0, "NA": 0, "NoFeature": 0, "Po": 1, "Fa": 2, "TA": 3, "Gd": 4, "Ex": 5}
+BASEMENT_EXPOSURE_MAPPING = {"None": 0, "NA": 0, "NoFeature": 0, "No": 1, "Mn": 2, "Av": 3, "Gd": 4}
 BASEMENT_FINISH_MAPPING = {
     "None": 0,
     "NA": 0,
+    "NoFeature": 0,
     "Unf": 1,
     "LwQ": 2,
     "Rec": 3,
@@ -80,7 +97,7 @@ BASEMENT_FINISH_MAPPING = {
     "ALQ": 5,
     "GLQ": 6,
 }
-GARAGE_FINISH_MAPPING = {"None": 0, "NA": 0, "Unf": 1, "RFn": 2, "Fin": 3}
+GARAGE_FINISH_MAPPING = {"None": 0, "NA": 0, "NoFeature": 0, "Unf": 1, "RFn": 2, "Fin": 3}
 FUNCTIONAL_MAPPING = {"Sal": 0, "Sev": 1, "Maj2": 2, "Maj1": 3, "Mod": 4, "Min2": 5, "Min1": 6, "Typ": 7}
 PAVED_DRIVE_MAPPING = {"N": 0, "P": 1, "Y": 2}
 LOT_SHAPE_MAPPING = {"IR3": 0, "IR2": 1, "IR1": 2, "Reg": 3}
@@ -162,19 +179,40 @@ REDUCED_LINEAR_DROP_COLUMNS = [
     "tot_rms_abv_grd",
     "first_flr_sf",
     "second_flr_sf",
+    "total_above_ground_sf",
+    "total_bsmt_sf",
+    "bsmt_fin_sf_1",
+    "bsmt_fin_sf_2",
+    "bsmt_unf_sf",
+    "low_qual_fin_sf",
+    "full_bath",
+    "half_bath",
+    "bsmt_full_bath",
+    "bsmt_half_bath",
+    "wood_deck_sf",
+    "open_porch_sf",
+    "enclosed_porch",
+    "three_ssn_porch",
+    "screen_porch",
     "year_built",
     "year_remod_add",
+    "garage_age_at_sale",
+    "sale_year",
+    "sale_month",
+    "sale_ym_index",
 ]
 
-PENDING_CONTEXT_FEATURES = [
+SUPPLEMENTARY_CONTEXT_FEATURES = [
     "mortgage_rate",
     "days_on_market",
     "distance_to_center",
-    # Add the 4th finalized contextual/synthetic column name here after EDA update.
 ]
+TIME_FEATURES = ["yr_sold", "mo_sold", "sale_year", "sale_month", "sale_quarter", "sale_ym_index"]
+LOCATION_FEATURES = ["neighborhood", "distance_to_center"]
 
 DERIVED_FEATURES = [
     "age_at_sale",
+    "years_since_remodel",
     "years_since_remod",
     "garage_age_at_sale",
     "total_sf",
@@ -186,7 +224,11 @@ DERIVED_FEATURES = [
     "has_pool",
     "has_fireplace",
     "has_porch",
+    "has_fence",
     "is_new_house",
+    "qual_gr_liv_area",
+    "qual_total_sf",
+    "age_qual_interaction",
     "age_negative_flag",
     "remodel_negative_flag",
     "garage_age_negative_flag",

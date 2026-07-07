@@ -11,7 +11,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.compose import ColumnTransformer, make_column_selector
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import FunctionTransformer, OneHotEncoder, StandardScaler
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 from house_price import config
 
@@ -36,6 +36,21 @@ def to_snake_case(name: str) -> str:
 def normalize_column_names(df: pd.DataFrame) -> pd.DataFrame:
     out = df.copy()
     out.columns = [to_snake_case(col) for col in out.columns]
+    aliases = {
+        "mssub_class": "ms_sub_class",
+        "mszoning": "ms_zoning",
+        "condition1": "condition_1",
+        "condition2": "condition_2",
+        "exteriorfirst": "exterior_1st",
+        "exteriorsecond": "exterior_2nd",
+        "bsmt_fin_type1": "bsmt_fin_type_1",
+        "bsmt_fin_type2": "bsmt_fin_type_2",
+        "bsmt_fin_sf1": "bsmt_fin_sf_1",
+        "bsmt_fin_sf2": "bsmt_fin_sf_2",
+    }
+    out = out.rename(columns={old: new for old, new in aliases.items() if old in out.columns})
+    if "years_since_remod" in out.columns and "years_since_remodel" not in out.columns:
+        out = out.rename(columns={"years_since_remod": "years_since_remodel"})
     return out
 
 
@@ -56,16 +71,31 @@ class FeatureEngineer(BaseEstimator, TransformerMixin):
     def __init__(
         self,
         include_derived: bool = True,
-        include_context_features: bool = False,
+        include_context_features: bool = True,
+        include_days_on_market: bool = True,
+        include_distance_to_center: bool = True,
+        include_neighborhood: bool = True,
+        include_time_features: bool = True,
+        include_mortgage_rate: bool = True,
         feature_set: str = "full",
         apply_log_to_skewed: bool = False,
     ) -> None:
         self.include_derived = include_derived
         self.include_context_features = include_context_features
+        self.include_days_on_market = include_days_on_market
+        self.include_distance_to_center = include_distance_to_center
+        self.include_neighborhood = include_neighborhood
+        self.include_time_features = include_time_features
+        self.include_mortgage_rate = include_mortgage_rate
         self.feature_set = feature_set
         self.apply_log_to_skewed = apply_log_to_skewed
 
     def fit(self, x: pd.DataFrame, y: Any = None) -> "FeatureEngineer":
+        df = normalize_column_names(pd.DataFrame(x).copy())
+        if "yr_sold" in df.columns and df["yr_sold"].notna().any():
+            self.min_train_year_ = int(pd.to_numeric(df["yr_sold"], errors="coerce").min())
+        else:
+            self.min_train_year_ = 0
         return self
 
     def transform(self, x: pd.DataFrame) -> pd.DataFrame:
@@ -79,7 +109,7 @@ class FeatureEngineer(BaseEstimator, TransformerMixin):
 
         df = self._encode_ordinals(df)
         df = self._prepare_nominals(df)
-        df = self._filter_context_features(df)
+        df = self._filter_feature_groups(df)
         df = self._drop_leakage_and_identifiers(df)
 
         if self.feature_set == "reduced_linear":
@@ -95,17 +125,29 @@ class FeatureEngineer(BaseEstimator, TransformerMixin):
     def _fill_structural_absence(self, df: pd.DataFrame) -> pd.DataFrame:
         for col in config.STRUCTURAL_CATEGORICAL_COLUMNS:
             if col in df.columns:
-                df[col] = df[col].fillna("None")
+                df[col] = df[col].fillna("NoFeature")
         for col in config.STRUCTURAL_NUMERIC_COLUMNS:
             if col in df.columns:
                 df[col] = df[col].fillna(0)
         return df
 
     def _create_derived_features(self, df: pd.DataFrame) -> pd.DataFrame:
+        if "yr_sold" in df.columns:
+            df["sale_year"] = df["yr_sold"]
+        if "mo_sold" in df.columns:
+            df["sale_month"] = df["mo_sold"]
+            df["sale_quarter"] = np.ceil(pd.to_numeric(df["mo_sold"], errors="coerce") / 3).astype("Int64")
+        if {"yr_sold", "mo_sold"}.issubset(df.columns):
+            yr = pd.to_numeric(df["yr_sold"], errors="coerce")
+            mo = pd.to_numeric(df["mo_sold"], errors="coerce")
+            df["sale_ym_index"] = (yr - getattr(self, "min_train_year_", int(yr.min()))) * 12 + mo
+
         if {"yr_sold", "year_built"}.issubset(df.columns):
-            df["age_at_sale"] = df["yr_sold"] - df["year_built"]
+            if "age_at_sale" not in df.columns:
+                df["age_at_sale"] = df["yr_sold"] - df["year_built"]
         if {"yr_sold", "year_remod_add"}.issubset(df.columns):
-            df["years_since_remod"] = df["yr_sold"] - df["year_remod_add"]
+            if "years_since_remodel" not in df.columns:
+                df["years_since_remodel"] = df["yr_sold"] - df["year_remod_add"]
         if {"yr_sold", "garage_yr_blt"}.issubset(df.columns):
             df["garage_age_at_sale"] = df["yr_sold"] - df["garage_yr_blt"]
 
@@ -141,6 +183,8 @@ class FeatureEngineer(BaseEstimator, TransformerMixin):
             df["has_pool"] = _safe_binary(df["pool_area"] > 0)
         if "fireplaces" in df.columns:
             df["has_fireplace"] = _safe_binary(df["fireplaces"] > 0)
+        if "fence" in df.columns:
+            df["has_fence"] = _safe_binary(~df["fence"].fillna("NoFeature").isin(["NoFeature", "None", "NA"]))
         if "total_porch_sf" in df.columns:
             df["has_porch"] = _safe_binary(df["total_porch_sf"] > 0)
         new_flags = []
@@ -151,13 +195,20 @@ class FeatureEngineer(BaseEstimator, TransformerMixin):
         if new_flags:
             df["is_new_house"] = _safe_binary(pd.concat(new_flags, axis=1).any(axis=1))
 
+        if {"overall_qual", "gr_liv_area"}.issubset(df.columns):
+            df["qual_gr_liv_area"] = df["overall_qual"] * df["gr_liv_area"]
+        if {"overall_qual", "total_sf"}.issubset(df.columns):
+            df["qual_total_sf"] = df["overall_qual"] * df["total_sf"]
+        if {"overall_qual", "age_at_sale"}.issubset(df.columns):
+            df["age_qual_interaction"] = df["age_at_sale"] * df["overall_qual"]
+
         df = self._clip_negative_age_features(df)
         return df
 
     def _clip_negative_age_features(self, df: pd.DataFrame) -> pd.DataFrame:
         age_columns = {
             "age_at_sale": "age_negative_flag",
-            "years_since_remod": "remodel_negative_flag",
+            "years_since_remodel": "remodel_negative_flag",
             "garage_age_at_sale": "garage_age_negative_flag",
         }
         for age_col, flag_col in age_columns.items():
@@ -172,7 +223,7 @@ class FeatureEngineer(BaseEstimator, TransformerMixin):
     def _encode_ordinals(self, df: pd.DataFrame) -> pd.DataFrame:
         for col, mapping in config.ORDINAL_MAPPINGS.items():
             if col in df.columns:
-                df[col] = df[col].fillna("None").map(mapping).fillna(0).astype(float)
+                df[col] = df[col].fillna("NoFeature").map(mapping).fillna(0).astype(float)
         return df
 
     def _prepare_nominals(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -184,10 +235,26 @@ class FeatureEngineer(BaseEstimator, TransformerMixin):
                 df["ms_sub_class"] = df["ms_sub_class"].astype(str).replace({"nan": np.nan, "None": np.nan})
         return df
 
-    def _filter_context_features(self, df: pd.DataFrame) -> pd.DataFrame:
-        context_cols = [col for col in config.PENDING_CONTEXT_FEATURES if col in df.columns]
-        if not self.include_context_features and context_cols:
-            df = df.drop(columns=context_cols)
+    def _filter_feature_groups(self, df: pd.DataFrame) -> pd.DataFrame:
+        drop_cols: list[str] = []
+        context_cols = [col for col in config.SUPPLEMENTARY_CONTEXT_FEATURES if col in df.columns]
+        if not self.include_context_features:
+            drop_cols.extend(context_cols)
+        else:
+            if not self.include_days_on_market:
+                drop_cols.append("days_on_market")
+            if not self.include_distance_to_center:
+                drop_cols.append("distance_to_center")
+            if not self.include_mortgage_rate:
+                drop_cols.append("mortgage_rate")
+
+        if not self.include_neighborhood:
+            drop_cols.append("neighborhood")
+        if not self.include_time_features:
+            drop_cols.extend([col for col in config.TIME_FEATURES if col in df.columns])
+
+        if drop_cols:
+            df = df.drop(columns=[col for col in drop_cols if col in df.columns], errors="ignore")
         return df
 
     def _drop_leakage_and_identifiers(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -239,7 +306,12 @@ def build_preprocessor(scale_numeric: bool = False) -> ColumnTransformer:
 def build_model_pipeline(
     estimator: Any,
     include_derived: bool = True,
-    include_context_features: bool = False,
+    include_context_features: bool = True,
+    include_days_on_market: bool = True,
+    include_distance_to_center: bool = True,
+    include_neighborhood: bool = True,
+    include_time_features: bool = True,
+    include_mortgage_rate: bool = True,
     feature_set: str = "full",
     scale_numeric: bool = False,
     apply_log_to_skewed: bool = False,
@@ -251,6 +323,11 @@ def build_model_pipeline(
                 FeatureEngineer(
                     include_derived=include_derived,
                     include_context_features=include_context_features,
+                    include_days_on_market=include_days_on_market,
+                    include_distance_to_center=include_distance_to_center,
+                    include_neighborhood=include_neighborhood,
+                    include_time_features=include_time_features,
+                    include_mortgage_rate=include_mortgage_rate,
                     feature_set=feature_set,
                     apply_log_to_skewed=apply_log_to_skewed,
                 ),
@@ -264,13 +341,23 @@ def build_model_pipeline(
 def get_engineered_feature_frame(
     df: pd.DataFrame,
     include_derived: bool = True,
-    include_context_features: bool = False,
+    include_context_features: bool = True,
+    include_days_on_market: bool = True,
+    include_distance_to_center: bool = True,
+    include_neighborhood: bool = True,
+    include_time_features: bool = True,
+    include_mortgage_rate: bool = True,
     feature_set: str = "full",
     apply_log_to_skewed: bool = False,
 ) -> pd.DataFrame:
     transformer = FeatureEngineer(
         include_derived=include_derived,
         include_context_features=include_context_features,
+        include_days_on_market=include_days_on_market,
+        include_distance_to_center=include_distance_to_center,
+        include_neighborhood=include_neighborhood,
+        include_time_features=include_time_features,
+        include_mortgage_rate=include_mortgage_rate,
         feature_set=feature_set,
         apply_log_to_skewed=apply_log_to_skewed,
     )

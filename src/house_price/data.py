@@ -15,9 +15,8 @@ from house_price.features import normalize_column_names
 LOGGER = logging.getLogger(__name__)
 
 CLEANED_NOT_FOUND_MESSAGE = (
-    "Cleaned data from Module 3 not found. Expected data/processed/train_cleaned.csv "
-    "or data/train_cleaned.csv or CLEANED_TRAIN_PATH. Use --allow-raw-fallback only for "
-    "local smoke tests before Module 3 is delivered."
+    "Cleaned data from Module 3 not found. Expected CleanData/data-v2/processed/train_cleaned.csv "
+    "or CLEANED_TRAIN_PATH. Use --allow-raw-fallback only for local smoke tests."
 )
 
 
@@ -35,6 +34,16 @@ def _first_existing(paths: list[Path]) -> Path | None:
     return None
 
 
+def discover_clean_data_files() -> tuple[list[Path], list[Path]]:
+    """Discover likely cleaned train/test CSVs without modifying CleanData."""
+    root = config.CLEANDATA_DIR
+    if not root.exists():
+        return [], []
+    train_candidates = sorted(root.glob("**/*train*clean*.csv")) + sorted(root.glob("**/train.csv"))
+    test_candidates = sorted(root.glob("**/*test*clean*.csv")) + sorted(root.glob("**/test.csv"))
+    return train_candidates, test_candidates
+
+
 def _kaggle_candidates(file_name: str) -> list[Path]:
     root = Path("/kaggle/input")
     if not root.exists():
@@ -49,7 +58,8 @@ def resolve_train_path(cleaned_train: str | Path | None = None, allow_raw_fallba
         if candidate.exists():
             return ResolvedPath(candidate, "explicit cleaned train path")
 
-    default_cleaned = _first_existing(config.DEFAULT_CLEANED_TRAIN_PATHS)
+    discovered_train, _ = discover_clean_data_files()
+    default_cleaned = _first_existing(config.DEFAULT_CLEANED_TRAIN_PATHS + discovered_train)
     if default_cleaned:
         return ResolvedPath(default_cleaned, "default cleaned train path")
 
@@ -62,9 +72,10 @@ def resolve_train_path(cleaned_train: str | Path | None = None, allow_raw_fallba
         return ResolvedPath(kaggle_cleaned[0], "Kaggle cleaned train path")
 
     if allow_raw_fallback:
-        if config.RAW_TRAIN_PATH.exists():
-            LOGGER.warning("Using raw %s because --allow-raw-fallback was set.", config.RAW_TRAIN_PATH)
-            return ResolvedPath(config.RAW_TRAIN_PATH, "raw fallback", used_raw_fallback=True)
+        raw_train = _first_existing(config.RAW_TRAIN_PATHS)
+        if raw_train:
+            LOGGER.warning("Using raw %s because --allow-raw-fallback was set.", raw_train)
+            return ResolvedPath(raw_train, "raw fallback", used_raw_fallback=True)
         kaggle_raw = _kaggle_candidates("train.csv")
         if kaggle_raw:
             LOGGER.warning("Using raw Kaggle train.csv because --allow-raw-fallback was set.")
@@ -79,7 +90,8 @@ def resolve_test_path(test_data: str | Path | None = None) -> ResolvedPath:
         if candidate.exists():
             return ResolvedPath(candidate, "explicit test path")
 
-    default_test = _first_existing(config.DEFAULT_TEST_PATHS)
+    _, discovered_test = discover_clean_data_files()
+    default_test = _first_existing(config.DEFAULT_TEST_PATHS + discovered_test + config.RAW_TEST_PATHS)
     if default_test:
         return ResolvedPath(default_test, "default test path")
 
@@ -105,7 +117,7 @@ def merge_context_features_if_available(df: pd.DataFrame) -> pd.DataFrame:
     if config.ID_COLUMN not in context_df.columns:
         return df
 
-    context_cols = [col for col in config.PENDING_CONTEXT_FEATURES if col in context_df.columns and col not in df.columns]
+    context_cols = [col for col in config.SUPPLEMENTARY_CONTEXT_FEATURES if col in context_df.columns and col not in df.columns]
     if not context_cols:
         return df
 
@@ -120,6 +132,8 @@ def load_training_data(
     resolved = resolve_train_path(cleaned_train, allow_raw_fallback=allow_raw_fallback)
     df = read_csv_normalized(resolved.path)
     df = merge_context_features_if_available(df)
+    if resolved.used_raw_fallback:
+        df = remove_high_leverage_outliers_if_present(df)
     validate_training_data(df, resolved)
     return df, resolved
 
@@ -137,6 +151,18 @@ def validate_training_data(df: pd.DataFrame, resolved: ResolvedPath | None = Non
         raise ValueError(f"Training data{source} must contain SalePrice / sale_price.")
     if config.ID_COLUMN in df.columns and df[config.ID_COLUMN].duplicated().any():
         LOGGER.warning("Duplicate Id values found in training data.")
+
+
+def remove_high_leverage_outliers_if_present(df: pd.DataFrame) -> pd.DataFrame:
+    """Drop only EDA-approved training outliers if a non-cleaned fallback still contains them."""
+    if config.ID_COLUMN not in df.columns:
+        return df
+    outlier_ids = {524, 1299}
+    mask = df[config.ID_COLUMN].isin(outlier_ids)
+    if mask.any():
+        LOGGER.warning("Dropping EDA-approved training outliers from fallback data: %s", sorted(df.loc[mask, config.ID_COLUMN].tolist()))
+        return df.loc[~mask].copy()
+    return df
 
 
 def split_target(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:

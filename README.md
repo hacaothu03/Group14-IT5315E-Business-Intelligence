@@ -1,19 +1,28 @@
 # House Price Prediction - Modules 4 and 5
 
-This repository contains the Module 4 feature engineering and Module 5 model development pipeline for the Kaggle Ames House Prices project.
+This repo contains the Module 4 feature engineering and Module 5 model development pipeline for the Ames/Kaggle House Prices project.
 
-## Current Inputs
+## Data Source
 
-The pipeline looks for training data in this order:
+Module 3 now provides cleaned data under `CleanData/`. The Module 4-5 pipeline treats these files as the primary source of truth:
 
-1. `data/processed/train_cleaned.csv`
-2. `data/train_cleaned.csv`
-3. `CLEANED_TRAIN_PATH`
-4. `/kaggle/input/**/train_cleaned.csv`
+- train: `CleanData/data-v2/processed/train_cleaned.csv`
+- test/submission: `CleanData/data-v2/processed/test_cleaned.csv`
 
-If no cleaned file exists, training stops with a clear Module 3 message. For local smoke tests only, pass `--allow-raw-fallback` to use `data/train.csv`.
+The cleaned train file contains `SalePrice`. The cleaned test file also contains `SalePrice` from the enriched Ames join, but the Kaggle submission writer only outputs `Id,SalePrice`.
 
-Test/submission data is resolved from `data/processed/test_cleaned.csv`, `data/test_cleaned.csv`, `data/test.csv`, or Kaggle input `test.csv`.
+The code does not modify or overwrite `CleanData/`.
+
+## Time Context
+
+`YrSold` and `MoSold` are valid prediction context because the business task predicts market price at a sale/search/valuation date. The feature pipeline keeps them by default and derives:
+
+- `sale_year`
+- `sale_month`
+- `sale_quarter`
+- `sale_ym_index`
+
+For a later API/demo, the input should include either `valuation_date` or both `search_year` and `search_month` so the same temporal features can be derived.
 
 ## Install
 
@@ -21,41 +30,61 @@ Test/submission data is resolved from `data/processed/test_cleaned.csv`, `data/t
 pip install -r requirements.txt
 ```
 
-`xgboost` is optional at runtime. If it is unavailable, the script trains the sklearn models and logs that boosting was skipped.
+`xgboost` is optional at runtime. If it is unavailable, the script trains the sklearn models and skips boosting gracefully.
 
 ## Run Feature Engineering
 
 ```bash
-python scripts/run_feature_engineering.py --cleaned-train data/processed/train_cleaned.csv
+python scripts/run_feature_engineering.py
 ```
 
-Local smoke test before Module 3 delivers cleaned data:
-
-```bash
-python scripts/run_feature_engineering.py --allow-raw-fallback
-```
+This writes engineered feature snapshots and feature lists under `outputs/`.
 
 ## Train Models
 
-Default run, no contextual/synthetic placeholders:
+Default run using `CleanData/`, with derived, contextual, location, and time/macro features enabled:
 
 ```bash
-python scripts/train_models.py --cleaned-train data/processed/train_cleaned.csv --include-context-features false
+python scripts/train_models.py
 ```
 
-Contextual simulation run:
+Useful ablation-style switches:
 
 ```bash
-python scripts/train_models.py --cleaned-train data/processed/train_cleaned.csv --include-context-features true
+python scripts/train_models.py --include-days-on-market false
+python scripts/train_models.py --include-distance-to-center false
+python scripts/train_models.py --include-neighborhood false
+python scripts/train_models.py --include-time-features false --include-mortgage-rate false
 ```
 
-Local smoke test only:
+Local raw-data fallback is only for smoke testing:
 
 ```bash
-python scripts/train_models.py --allow-raw-fallback --include-context-features false
+python scripts/train_models.py --allow-raw-fallback
 ```
 
-The main target is `log1p(SalePrice)`. Metrics and residual plots are converted back to the original SalePrice scale.
+## Models
+
+The training script compares:
+
+- Linear Regression
+- Ridge Regression
+- Lasso Regression
+- Random Forest Regressor
+- XGBoost, if installed; otherwise LightGBM if installed; otherwise skipped
+
+Training uses `log1p(SalePrice)`. Metrics and submissions are converted back to dollars with `expm1`.
+
+## Ablations
+
+`outputs/ablation_results.csv` compares:
+
+- base cleaned features
+- base plus derived features
+- derived plus supplementary/contextual features
+- with vs without `DaysOnMarket`
+- `Neighborhood` only vs `DistanceToCenter` only vs both
+- with vs without time/macro features, including `MortgageRate`
 
 ## Outputs
 
@@ -65,33 +94,57 @@ Training writes:
 - `outputs/cv_results.csv`
 - `outputs/ablation_results.csv`
 - `outputs/feature_importance.csv`
+- `outputs/model_artifacts.csv`
+- `outputs/tuning_results.csv`
+- `outputs/vif_report.csv`
 - `outputs/residual_summary.csv`
 - `outputs/error_by_price_bucket.csv`
 - `outputs/error_by_neighborhood.csv`
 - `outputs/error_by_overallqual.csv`
 - `figures/actual_vs_predicted.png`
 - `figures/residual_plot.png`
-- `figures/residuals_vs_predicted.png`
-- `figures/residual_distribution.png`
-- `figures/error_by_price_bucket.png`
-- `figures/top_feature_importance.png`
+- `figures/residuals_by_price_bucket.png`
 - `models/best_model.pkl`
 - `models/final_pipeline.pkl`
+- `models/checkpoints/*_pipeline.pkl`
+- `models/checkpoints/*_model.pkl`
 - `submissions/kaggle_submission.csv`
 
-`final_pipeline.pkl` includes feature engineering, preprocessing, and the trained model.
+`final_pipeline.pkl` is the selected best pipeline. Each file under `models/checkpoints/*_pipeline.pkl` is also a full reusable pipeline for that model family, including feature engineering, preprocessing, and the trained estimator. `Id` is preserved for submission but removed from model features.
 
-## Contextual Feature Placeholder
+## Inference Smoke Test
 
-The pending synthetic/contextual feature block is in `src/house_price/config.py`:
+The deployment inference utility is:
 
-```python
-PENDING_CONTEXT_FEATURES = [
-    "mortgage_rate",
-    "days_on_market",
-    "distance_to_center",
-    # Add the 4th finalized contextual/synthetic column name here after EDA update.
-]
+```text
+src/predict.py
 ```
 
-These columns are normalized to snake case and included only with `--include-context-features true`. `days_on_market` should be used only if it is available at prediction time or clearly labeled as a contextual simulation.
+Run the smoke test:
+
+```bash
+python src/smoke_test_inference.py
+```
+
+The inference path loads `models/final_pipeline.pkl`, applies the saved feature engineering and preprocessing, predicts on the log scale, and converts to USD with `expm1`.
+
+## For Module 6-7 Team
+
+1. Read `reports/HANDOFF_TO_MODULE_6_7.md` first.
+2. Use `src/predict.py` for inference.
+3. Do not manually reimplement feature engineering in the API.
+4. Provide valuation/search date in the API/UI using `valuation_date` or `search_year` + `search_month`.
+5. Log all prediction requests for monitoring.
+
+Important handoff files:
+
+- `reports/HANDOFF_TO_MODULE_6_7.md`
+- `reports/MODEL_CARD_LASSO_V1.md`
+- `reports/MODULE_4_FEATURE_ENGINEERING.md`
+- `reports/MODULE_5_MODEL_DEVELOPMENT.md`
+- `src/predict.py`
+- `src/smoke_test_inference.py`
+- `models/final_pipeline.pkl`
+- `outputs/metrics_summary.csv`
+- `outputs/residual_summary.csv`
+- `outputs/vif_report.csv`
