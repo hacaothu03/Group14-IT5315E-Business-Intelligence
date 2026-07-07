@@ -117,12 +117,18 @@ def save_model_checkpoints(fitted_pipelines: dict[str, object], best_name: str) 
         model_path = checkpoint_dir / f"{model_name}_model.pkl"
         save_artifact(pipeline, pipeline_path)
         save_artifact(pipeline.named_steps["model"], model_path)
+        try:
+            display_pipeline_path = pipeline_path.relative_to(config.REPO_ROOT)
+            display_model_path = model_path.relative_to(config.REPO_ROOT)
+        except ValueError:
+            display_pipeline_path = pipeline_path
+            display_model_path = model_path
         rows.append(
             {
                 "model": model_name,
                 "is_best_model": model_name == best_name,
-                "pipeline_path": str(pipeline_path),
-                "model_path": str(model_path),
+                "pipeline_path": str(display_pipeline_path),
+                "model_path": str(display_model_path),
                 "training_scope": "full_clean_training_data",
             }
         )

@@ -14,12 +14,13 @@ import joblib
 import numpy as np
 import pandas as pd
 
+from house_price import config
 from house_price.features import normalize_column_names
 
 MODEL_VERSION = "lasso_v1"
 TARGET_TRANSFORM = "log1p"
 INVERSE_TRANSFORM = "expm1"
-DEFAULT_TRAIN_SCHEMA_PATH = Path("CleanData/data-v2/processed/train_cleaned.csv")
+DEFAULT_TRAIN_SCHEMA_PATH = config.CLEANDATA_PROCESSED_DIR / "train_cleaned.csv"
 REQUIRED_CORE_FIELDS = [
     "neighborhood",
     "overall_qual",
@@ -30,7 +31,7 @@ REQUIRED_CORE_FIELDS = [
 
 
 def _load_metrics() -> dict[str, float | None]:
-    path = Path("outputs/metrics_summary.csv")
+    path = config.OUTPUT_DIR / "metrics_summary.csv"
     if not path.exists():
         return {"approx_validation_mape": None}
     metrics = pd.read_csv(path)
@@ -56,8 +57,9 @@ def _load_training_defaults(schema_path: Path = DEFAULT_TRAIN_SCHEMA_PATH) -> tu
     return list(train.columns), defaults
 
 
-def load_artifacts(model_dir: str = "models") -> dict[str, Any]:
-    model_path = Path(model_dir) / "final_pipeline.pkl"
+def load_artifacts(model_dir: str | Path | None = None) -> dict[str, Any]:
+    model_dir_path = config.MODEL_DIR if model_dir is None or str(model_dir) == "models" else Path(model_dir)
+    model_path = model_dir_path / "final_pipeline.pkl"
     if not model_path.exists():
         raise FileNotFoundError(f"Model pipeline not found: {model_path}")
     train_columns, defaults = _load_training_defaults()

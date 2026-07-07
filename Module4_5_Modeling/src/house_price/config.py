@@ -8,6 +8,9 @@ RANDOM_SEED = 42
 TARGET_COLUMN = "sale_price"
 ID_COLUMN = "id"
 
+MODULE_DIR = Path(__file__).resolve().parents[2]
+REPO_ROOT = MODULE_DIR.parent
+
 KAGGLE_MODE = Path("/kaggle/input").exists()
 if KAGGLE_MODE:
     DATA_DIR = Path("/kaggle/input")
@@ -16,41 +19,41 @@ if KAGGLE_MODE:
     MODEL_DIR = Path("/kaggle/working/models")
     SUBMISSION_DIR = Path("/kaggle/working/submissions")
 else:
-    DATA_DIR = Path("data")
-    OUTPUT_DIR = Path("outputs")
-    FIGURE_DIR = Path("figures")
-    MODEL_DIR = Path("models")
-    SUBMISSION_DIR = Path("submissions")
+    DATA_DIR = REPO_ROOT / "data"
+    OUTPUT_DIR = MODULE_DIR / "outputs"
+    FIGURE_DIR = MODULE_DIR / "figures"
+    MODEL_DIR = MODULE_DIR / "models"
+    SUBMISSION_DIR = MODULE_DIR / "submissions"
 
-CLEANDATA_DIR = Path("CleanData")
+CLEANDATA_DIR = REPO_ROOT / "CleanData"
 CLEANDATA_V2_DIR = CLEANDATA_DIR / "data-v2"
 CLEANDATA_PROCESSED_DIR = CLEANDATA_V2_DIR / "processed"
-PROCESSED_DIR = Path("data/processed")
+PROCESSED_DIR = DATA_DIR / "processed"
 DEFAULT_CLEANED_TRAIN_PATHS = [
     CLEANDATA_PROCESSED_DIR / "train_cleaned.csv",
     CLEANDATA_V2_DIR / "train.csv",
-    Path("data/final_data/train_v2.csv"),
+    DATA_DIR / "final_data" / "train_v2.csv",
     PROCESSED_DIR / "train_cleaned.csv",
-    Path("data/train_cleaned.csv"),
+    DATA_DIR / "train_cleaned.csv",
 ]
 DEFAULT_TEST_PATHS = [
     CLEANDATA_PROCESSED_DIR / "test_cleaned.csv",
     CLEANDATA_V2_DIR / "test.csv",
-    Path("data/final_data/test_v2.csv"),
+    DATA_DIR / "final_data" / "test_v2.csv",
     PROCESSED_DIR / "test_cleaned.csv",
-    Path("data/test_cleaned.csv"),
-    Path("data/kaggle_data/test.csv"),
+    DATA_DIR / "test_cleaned.csv",
+    DATA_DIR / "kaggle_data" / "test.csv",
 ]
 RAW_TRAIN_PATHS = [
-    Path("data/kaggle_data/train.csv"),
-    Path("data/train.csv"),
+    DATA_DIR / "kaggle_data" / "train.csv",
+    DATA_DIR / "train.csv",
 ]
 RAW_TEST_PATHS = [
-    Path("data/kaggle_data/test.csv"),
-    Path("data/test.csv"),
+    DATA_DIR / "kaggle_data" / "test.csv",
+    DATA_DIR / "test.csv",
 ]
-SAMPLE_SUBMISSION_PATH = Path("CleanData/data-v2/sample_submission.csv")
-CONTEXT_SOURCE_PATH = Path("data/housing_initial_data.csv")
+SAMPLE_SUBMISSION_PATH = CLEANDATA_V2_DIR / "sample_submission.csv"
+CONTEXT_SOURCE_PATH = DATA_DIR / "housing_initial_data.csv"
 
 STRUCTURAL_CATEGORICAL_COLUMNS = [
     "alley",

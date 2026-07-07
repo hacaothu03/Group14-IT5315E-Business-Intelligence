@@ -34,6 +34,18 @@ def _first_existing(paths: list[Path]) -> Path | None:
     return None
 
 
+def _resolve_user_path(path_value: str | Path) -> Path | None:
+    candidate = Path(path_value)
+    if candidate.exists():
+        return candidate
+    if not candidate.is_absolute():
+        for base in (config.REPO_ROOT, config.MODULE_DIR):
+            rooted = base / candidate
+            if rooted.exists():
+                return rooted
+    return None
+
+
 def discover_clean_data_files() -> tuple[list[Path], list[Path]]:
     """Discover likely cleaned train/test CSVs without modifying CleanData."""
     root = config.CLEANDATA_DIR
@@ -54,8 +66,8 @@ def _kaggle_candidates(file_name: str) -> list[Path]:
 def resolve_train_path(cleaned_train: str | Path | None = None, allow_raw_fallback: bool = False) -> ResolvedPath:
     """Resolve training input without silently falling back to raw data."""
     if cleaned_train:
-        candidate = Path(cleaned_train)
-        if candidate.exists():
+        candidate = _resolve_user_path(cleaned_train)
+        if candidate:
             return ResolvedPath(candidate, "explicit cleaned train path")
 
     discovered_train, _ = discover_clean_data_files()
@@ -64,8 +76,10 @@ def resolve_train_path(cleaned_train: str | Path | None = None, allow_raw_fallba
         return ResolvedPath(default_cleaned, "default cleaned train path")
 
     env_path = os.environ.get("CLEANED_TRAIN_PATH")
-    if env_path and Path(env_path).exists():
-        return ResolvedPath(Path(env_path), "CLEANED_TRAIN_PATH")
+    if env_path:
+        candidate = _resolve_user_path(env_path)
+        if candidate:
+            return ResolvedPath(candidate, "CLEANED_TRAIN_PATH")
 
     kaggle_cleaned = _kaggle_candidates("train_cleaned.csv")
     if kaggle_cleaned:
@@ -86,8 +100,8 @@ def resolve_train_path(cleaned_train: str | Path | None = None, allow_raw_fallba
 
 def resolve_test_path(test_data: str | Path | None = None) -> ResolvedPath:
     if test_data:
-        candidate = Path(test_data)
-        if candidate.exists():
+        candidate = _resolve_user_path(test_data)
+        if candidate:
             return ResolvedPath(candidate, "explicit test path")
 
     _, discovered_test = discover_clean_data_files()

@@ -12,37 +12,37 @@ The model predicts expected sale price at a provided sale/search/valuation date.
 
 Core artifacts:
 
-- `models/final_pipeline.pkl`
-- `models/best_model.pkl`
-- `models/preprocessing_pipeline.pkl`
-- `models/checkpoints/lasso_regression_pipeline.pkl`
-- `outputs/metrics_summary.csv`
-- `outputs/residual_summary.csv`
-- `outputs/feature_importance.csv`
-- `outputs/vif_report.csv`
+- `Module4_5_Modeling/models/final_pipeline.pkl`
+- `Module4_5_Modeling/models/best_model.pkl`
+- `Module4_5_Modeling/models/preprocessing_pipeline.pkl`
+- `Module4_5_Modeling/models/checkpoints/lasso_regression_pipeline.pkl`
+- `Module4_5_Modeling/outputs/metrics_summary.csv`
+- `Module4_5_Modeling/outputs/residual_summary.csv`
+- `Module4_5_Modeling/outputs/feature_importance.csv`
+- `Module4_5_Modeling/outputs/vif_report.csv`
 
 Inference code:
 
-- `src/predict.py`
-- `src/smoke_test_inference.py`
+- `Module4_5_Modeling/src/predict.py`
+- `Module4_5_Modeling/src/smoke_test_inference.py`
 
 Secondary Kaggle artifact:
 
-- `submissions/kaggle_submission.csv`
+- `Module4_5_Modeling/submissions/kaggle_submission.csv`
 
 ## 3. Actual Artifact Design
 
 This repo uses **Case A**:
 
 ```text
-models/final_pipeline.pkl = full sklearn Pipeline
+Module4_5_Modeling/models/final_pipeline.pkl = full sklearn Pipeline
 feature engineering -> preprocessing -> final Lasso model
 ```
 
 Inference should therefore use:
 
 ```python
-pipeline = joblib.load("models/final_pipeline.pkl")
+pipeline = joblib.load("Module4_5_Modeling/models/final_pipeline.pkl")
 pred_log = pipeline.predict(input_df)
 pred_price = np.expm1(pred_log)
 ```
@@ -54,9 +54,13 @@ Do not refit encoders, scalers, imputers, or feature engineering logic in deploy
 Recommended Module 6 usage:
 
 ```python
-from src.predict import load_artifacts, predict_price
+import sys
+from pathlib import Path
 
-artifacts = load_artifacts("models")
+sys.path.insert(0, str(Path("Module4_5_Modeling/src").resolve()))
+from predict import load_artifacts, predict_price
+
+artifacts = load_artifacts()
 result = predict_price(raw_input, artifacts=artifacts)
 ```
 
@@ -232,11 +236,11 @@ Suggested retraining triggers:
 
 ## 12. Files Module 6-7 Should Read First
 
-1. `reports/HANDOFF_TO_MODULE_6_7.md`
-2. `reports/MODEL_CARD_LASSO_V1.md`
-3. `src/predict.py`
-4. `src/smoke_test_inference.py`
-5. `models/final_pipeline.pkl`
-6. `outputs/metrics_summary.csv`
-7. `outputs/residual_summary.csv`
-8. `outputs/vif_report.csv`
+1. `Module4_5_Modeling/reports/HANDOFF_TO_MODULE_6_7.md`
+2. `Module4_5_Modeling/reports/MODEL_CARD_LASSO_V1.md`
+3. `Module4_5_Modeling/src/predict.py`
+4. `Module4_5_Modeling/src/smoke_test_inference.py`
+5. `Module4_5_Modeling/models/final_pipeline.pkl`
+6. `Module4_5_Modeling/outputs/metrics_summary.csv`
+7. `Module4_5_Modeling/outputs/residual_summary.csv`
+8. `Module4_5_Modeling/outputs/vif_report.csv`
