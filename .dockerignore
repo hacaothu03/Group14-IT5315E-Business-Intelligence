@@ -1,0 +1,28 @@
+# Keep the Docker build context (repo root) small. The Module 6 Dockerfile only
+# COPYs the few directories it needs, so exclude everything heavy/irrelevant.
+.git
+.gitignore
+**/__pycache__
+**/*.pyc
+**/.ipynb_checkpoints
+**/*.ipynb
+
+# Raw / intermediate data not needed at serving time.
+data/
+Business_DataGen/
+EDA/
+CleanData/data-v2/train.csv
+CleanData/data-v2/test.csv
+CleanData/data-v2/processed/test_cleaned.csv
+CleanData/data-v2/processed/*.json
+
+# Model training byproducts not needed for inference.
+Module4_5_Modeling/models/checkpoints/
+Module4_5_Modeling/figures/
+Module4_5_Modeling/submissions/
+Module4_5_Modeling/notebooks/
+
+# Local logs / reports.
+Module6_7_Deployment/logs/*.jsonl
+Module6_7_Deployment/monitoring/reports/*.html
+documents/

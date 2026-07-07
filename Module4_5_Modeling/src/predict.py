@@ -29,6 +29,19 @@ REQUIRED_CORE_FIELDS = [
     "year_remod_add",
 ]
 
+# Columns the pipeline's FeatureEngineer derives from raw inputs *only when they
+# are absent* (e.g. age_at_sale = yr_sold - year_built). They must NOT be
+# pre-filled with training medians for partial inputs: doing so suppresses that
+# per-record derivation, so a property with no explicit age would be scored at
+# the median age (~35) regardless of its YearBuilt. Leaving them absent lets the
+# pipeline compute them. Their source columns (year_built, year_remod_add,
+# yr_sold) are guaranteed present via REQUIRED_CORE_FIELDS + date context. If a
+# caller passes them explicitly, they are kept and respected.
+PIPELINE_DERIVED_FIELDS = [
+    "age_at_sale",
+    "years_since_remodel",
+]
+
 
 def _load_metrics() -> dict[str, float | None]:
     path = config.OUTPUT_DIR / "metrics_summary.csv"
@@ -116,11 +129,16 @@ def _prepare_input(input_data: dict[str, Any] | pd.DataFrame, artifacts: dict[st
     filled_fields: list[str] = []
     defaults = artifacts["defaults"]
     for col in artifacts["train_columns"]:
-        if col not in df.columns:
-            df[col] = defaults.get(col, np.nan)
-            filled_fields.append(col)
+        if col in df.columns or col in PIPELINE_DERIVED_FIELDS:
+            continue
+        df[col] = defaults.get(col, np.nan)
+        filled_fields.append(col)
 
-    return df[artifacts["train_columns"]], filled_fields
+    # Return columns in training order. Pipeline-derived fields that were left
+    # unfilled above are recreated inside the pipeline's FeatureEngineer, so we
+    # select only the columns actually present here.
+    ordered = [col for col in artifacts["train_columns"] if col in df.columns]
+    return df[ordered], filled_fields
 
 
 def predict_price(

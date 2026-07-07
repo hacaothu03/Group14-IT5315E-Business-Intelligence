@@ -1,0 +1,18 @@
+# Render.com Blueprint (reference).
+#
+# Render auto-detects render.yaml at the REPOSITORY ROOT. To use this blueprint,
+# copy it to the repo root (or create the service manually in the Render
+# dashboard with the same settings). The Docker build context must be the repo
+# root so the image can include the Module 4-5 pipeline and CleanData.
+services:
+  - type: web
+    name: house-price-valuation-api
+    runtime: docker
+    dockerfilePath: ./Module6_7_Deployment/Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: PREDICTION_LOG_PATH
+        value: /app/Module6_7_Deployment/logs/predictions.jsonl
+    # Render provides $PORT automatically; the Dockerfile CMD honors it.
