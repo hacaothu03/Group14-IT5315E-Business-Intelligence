@@ -1,0 +1,13 @@
+.venv/
+.matplotlib/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+context/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+*.log
+.DS_Store
+Thumbs.db
