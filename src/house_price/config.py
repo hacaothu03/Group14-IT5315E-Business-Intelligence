@@ -1,0 +1,196 @@
+"""Configuration for the Module 4-5 house price pipeline."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+RANDOM_SEED = 42
+TARGET_COLUMN = "sale_price"
+ID_COLUMN = "id"
+
+KAGGLE_MODE = Path("/kaggle/input").exists()
+if KAGGLE_MODE:
+    DATA_DIR = Path("/kaggle/input")
+    OUTPUT_DIR = Path("/kaggle/working/outputs")
+    FIGURE_DIR = Path("/kaggle/working/figures")
+    MODEL_DIR = Path("/kaggle/working/models")
+    SUBMISSION_DIR = Path("/kaggle/working/submissions")
+else:
+    DATA_DIR = Path("data")
+    OUTPUT_DIR = Path("outputs")
+    FIGURE_DIR = Path("figures")
+    MODEL_DIR = Path("models")
+    SUBMISSION_DIR = Path("submissions")
+
+PROCESSED_DIR = Path("data/processed")
+DEFAULT_CLEANED_TRAIN_PATHS = [
+    PROCESSED_DIR / "train_cleaned.csv",
+    Path("data/train_cleaned.csv"),
+]
+DEFAULT_TEST_PATHS = [
+    PROCESSED_DIR / "test_cleaned.csv",
+    Path("data/test_cleaned.csv"),
+    Path("data/test.csv"),
+]
+RAW_TRAIN_PATH = Path("data/train.csv")
+SAMPLE_SUBMISSION_PATH = Path("data/sample_submission.csv")
+CONTEXT_SOURCE_PATH = Path("data/housing_initial_data.csv")
+
+STRUCTURAL_CATEGORICAL_COLUMNS = [
+    "alley",
+    "pool_qc",
+    "fence",
+    "fireplace_qu",
+    "misc_feature",
+    "garage_type",
+    "garage_finish",
+    "garage_qual",
+    "garage_cond",
+    "bsmt_qual",
+    "bsmt_cond",
+    "bsmt_exposure",
+    "bsmt_fin_type_1",
+    "bsmt_fin_type_2",
+    "mas_vnr_type",
+]
+
+STRUCTURAL_NUMERIC_COLUMNS = [
+    "garage_yr_blt",
+    "garage_area",
+    "garage_cars",
+    "bsmt_fin_sf_1",
+    "bsmt_fin_sf_2",
+    "bsmt_unf_sf",
+    "total_bsmt_sf",
+    "bsmt_full_bath",
+    "bsmt_half_bath",
+    "mas_vnr_area",
+    "pool_area",
+]
+
+QUALITY_MAPPING = {"None": 0, "NA": 0, "Po": 1, "Fa": 2, "TA": 3, "Gd": 4, "Ex": 5}
+BASEMENT_EXPOSURE_MAPPING = {"None": 0, "NA": 0, "No": 1, "Mn": 2, "Av": 3, "Gd": 4}
+BASEMENT_FINISH_MAPPING = {
+    "None": 0,
+    "NA": 0,
+    "Unf": 1,
+    "LwQ": 2,
+    "Rec": 3,
+    "BLQ": 4,
+    "ALQ": 5,
+    "GLQ": 6,
+}
+GARAGE_FINISH_MAPPING = {"None": 0, "NA": 0, "Unf": 1, "RFn": 2, "Fin": 3}
+FUNCTIONAL_MAPPING = {"Sal": 0, "Sev": 1, "Maj2": 2, "Maj1": 3, "Mod": 4, "Min2": 5, "Min1": 6, "Typ": 7}
+PAVED_DRIVE_MAPPING = {"N": 0, "P": 1, "Y": 2}
+LOT_SHAPE_MAPPING = {"IR3": 0, "IR2": 1, "IR1": 2, "Reg": 3}
+LAND_SLOPE_MAPPING = {"Sev": 0, "Mod": 1, "Gtl": 2}
+
+ORDINAL_MAPPINGS = {
+    "exter_qual": QUALITY_MAPPING,
+    "exter_cond": QUALITY_MAPPING,
+    "bsmt_qual": QUALITY_MAPPING,
+    "bsmt_cond": QUALITY_MAPPING,
+    "heating_qc": QUALITY_MAPPING,
+    "kitchen_qual": QUALITY_MAPPING,
+    "fireplace_qu": QUALITY_MAPPING,
+    "garage_qual": QUALITY_MAPPING,
+    "garage_cond": QUALITY_MAPPING,
+    "pool_qc": QUALITY_MAPPING,
+    "bsmt_exposure": BASEMENT_EXPOSURE_MAPPING,
+    "bsmt_fin_type_1": BASEMENT_FINISH_MAPPING,
+    "bsmt_fin_type_2": BASEMENT_FINISH_MAPPING,
+    "garage_finish": GARAGE_FINISH_MAPPING,
+    "functional": FUNCTIONAL_MAPPING,
+    "paved_drive": PAVED_DRIVE_MAPPING,
+    "lot_shape": LOT_SHAPE_MAPPING,
+    "land_slope": LAND_SLOPE_MAPPING,
+}
+
+NOMINAL_CATEGORICAL_COLUMNS = [
+    "ms_sub_class",
+    "ms_zoning",
+    "street",
+    "lot_config",
+    "land_contour",
+    "neighborhood",
+    "condition_1",
+    "condition_2",
+    "bldg_type",
+    "house_style",
+    "roof_style",
+    "roof_matl",
+    "exterior_1st",
+    "exterior_2nd",
+    "mas_vnr_type",
+    "foundation",
+    "heating",
+    "central_air",
+    "electrical",
+    "garage_type",
+    "misc_feature",
+    "sale_type",
+    "sale_condition",
+]
+
+SKEWED_NUMERIC_COLUMNS = [
+    "lot_area",
+    "gr_liv_area",
+    "total_bsmt_sf",
+    "first_flr_sf",
+    "garage_area",
+    "mas_vnr_area",
+    "total_sf",
+    "total_porch_sf",
+]
+
+LEAKAGE_COLUMNS = [
+    "sale_price",
+    "price_per_sqft",
+    "price_per_square_foot",
+    "price_per_m2",
+    "price_per_square_meter",
+]
+
+REDUCED_LINEAR_DROP_COLUMNS = [
+    "garage_area",
+    "garage_cond",
+    "pool_area",
+    "pool_qc",
+    "fireplace_qu",
+    "garage_yr_blt",
+    "tot_rms_abv_grd",
+    "first_flr_sf",
+    "second_flr_sf",
+    "year_built",
+    "year_remod_add",
+]
+
+PENDING_CONTEXT_FEATURES = [
+    "mortgage_rate",
+    "days_on_market",
+    "distance_to_center",
+    # Add the 4th finalized contextual/synthetic column name here after EDA update.
+]
+
+DERIVED_FEATURES = [
+    "age_at_sale",
+    "years_since_remod",
+    "garage_age_at_sale",
+    "total_sf",
+    "total_above_ground_sf",
+    "total_bath",
+    "total_porch_sf",
+    "has_basement",
+    "has_garage",
+    "has_pool",
+    "has_fireplace",
+    "has_porch",
+    "is_new_house",
+    "age_negative_flag",
+    "remodel_negative_flag",
+    "garage_age_negative_flag",
+]
+
+PRICE_BUCKETS = [0, 100000, 150000, 200000, 300000, 500000, float("inf")]
+PRICE_BUCKET_LABELS = ["<100k", "100k-150k", "150k-200k", "200k-300k", "300k-500k", "500k+"]
