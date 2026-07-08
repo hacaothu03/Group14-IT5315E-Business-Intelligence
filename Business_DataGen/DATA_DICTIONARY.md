@@ -23,8 +23,8 @@ This dataset is an enriched version of the original Ames Housing dataset compile
 
 | **Feature Cluster** | **Representative Variables Included** | **Expected Operational Range** | **Business Meaning & Logic** |
 | ------ | ------ | ------ | ------ |
-| **1. Target & Synthetic Features** | SalePrice, DaysOnMarket, Distance_to_Center, Mortgage_Rate | **Price:** > $0 <br> **DOM:** 1 to ~160 Days <br> **Dist:** 0.1 to ~5.5 Miles | Contains the target variable (SalePrice) and synthetic contextual features engineered to reflect market liquidity, spatial concentric proximity, and macroeconomic borrowing costs. |
-| **2. Derived Temporal Features** | Age_At_Sale, Years_Since_Remodel, YrSold, MoSold | **Age:** -5 to ~150 Years <br> **Years:** 2006-2010 | Physical age and renovation timelines. *Note: Negative values are explicitly retained to accurately reflect off-plan (pre-construction) contracts.* |
+| **1. Target & Synthetic Features** | SalePrice, Days on Market, Distance to Center, Mortgage Rate | **Price:** > $0 <br> **DOM:** 1 to ~160 Days <br> **Dist:** 0.1 to ~5.5 Miles | Contains the target variable (SalePrice) and synthetic contextual features engineered to reflect market liquidity, spatial concentric proximity, and macroeconomic borrowing costs. |
+| **2. Derived Temporal Features** | Age At Sale, Years Since Remodel, YrSold, MoSold | **Age:** -5 to ~150 Years <br> **Years:** 2006-2010 | Physical age and renovation timelines. *Note: Negative values are explicitly retained to accurately reflect off-plan (pre-construction) contracts.* |
 | **3. Transaction Conditions** | SaleType, SaleCondition | WD, New, Partial, Normal, Abnorml, etc. | Context of the sale. A 'Partial' condition explicitly identifies pre-construction/unfinished properties, heavily impacting pricing models. |
 | **4. Lot & Location** | Neighborhood, MSZoning, LotArea, LotFrontage, Condition1/2 | **Area:** > 0 Sq.Ft <br> **Zones:** RL, RM, CollgCr.. | Geographical zoning, neighborhood clustering, and proximity to externalities (e.g., positive parks, negative arterial streets/railroads). |
 | **5. Structural Quality & Style** | OverallQual, OverallCond, MSSubClass, BldgType, YearBuilt | **Rating:** 1-10 Scale <br> **Built:** ~1870-2010 | Holistic appraisals of material/finish quality and maintenance condition, along with dwelling style categories (e.g., 1-Story, Townhouse). |
@@ -93,8 +93,8 @@ This dataset is an enriched version of the original Ames Housing dataset compile
 | 50 | **Bsmt Half Bath** | Numeric (Float) | ≥ 0 Count | Basement half bathrooms. |
 | 51 | **Full Bath** | Numeric (Int) | ≥ 0 Count | Full bathrooms strictly above grade. |
 | 52 | **Half Bath** | Numeric (Int) | ≥ 0 Count | Half baths strictly above grade. |
-| 53 | **Bedroom** | Numeric (Int) | ≥ 0 Count | Bedrooms above grade (does NOT include basement bedrooms). |
-| 54 | **Kitchen** | Numeric (Int) | ≥ 0 Count | Kitchens above grade. |
+| 53 | **Bedroom AbvGr** | Numeric (Int) | ≥ 0 Count | Bedrooms above grade (does NOT include basement bedrooms). |
+| 54 | **Kitchen AbvGr** | Numeric (Int) | ≥ 0 Count | Kitchens above grade. |
 | 55 | **Kitchen Qual** | Ordinal (Str) | Ex, Gd, TA, Fa, Po | Kitchen quality. |
 | 56 | **TotRms AbvGrd** | Numeric (Int) | > 0 Count | Total rooms above grade (does not include bathrooms). |
 | 57 | **Functional** | Ordinal (Str) | Typ, Min1, Maj1, etc. | Home functionality rating (Assume typical unless deductions). |
@@ -123,11 +123,13 @@ This dataset is an enriched version of the original Ames Housing dataset compile
 | 80 | **Sale Type** | Categorical | WD, New, COD, etc. | Type of sale. |
 | 81 | **Sale Condition** | Categorical | Normal, Partial, etc. | Condition of sale (Partial heavily implies pre-construction). |
 | 82 | **SalePrice** | Numeric (Int) | > 0 USD | **[Target Variable]** The property's actual sale price. |
-| 83 | **Days On Market** | Numeric (Int) | 1 to ~160 Days | **[Synthetic]** Engineered liquidity metric. Capped via Winsorization. |
-| 84 | **Distance_to_Center** | Numeric (Float) | 0.1 to ~5.5 Miles | **[Synthetic]** Engineered concentric ring spatial proximity. |
+| 83 | **Age At Sale** | Numeric (Int) | -5 to ~150 Years | **[Derived]** (Yr Sold - Year Built). Negatives kept for off-plan. |
+| 84 | **Years Since Remodel** | Numeric (Int) | -5 to ~150 Years | **[Derived]** (Yr Sold - Year Remod/Add). Post-sale renovations. |
 | 85 | **Mortgage Rate** | Numeric (Float) | 4.50% to 6.80% | **[Synthetic]** Macroeconomic borrowing cost by sale date. |
-| 86 | **Age At Sale** | Numeric (Int) | -5 to ~150 Years | **[Derived]** (Yr Sold - Year Built). Negatives kept for off-plan. |
-| 87 | **Years Since Remodel** | Numeric (Int) | -5 to ~150 Years | **[Derived]** (Yr Sold - Year Remod/Add). Post-sale renovations. |
+| 86 | **Days on Market** | Numeric (Int) | 1 to ~160 Days | **[Synthetic]** Engineered liquidity metric. Capped via Winsorization. |
+| 87 | **Distance to Center** | Numeric (Float) | 0.1 to ~5.5 Miles | **[Synthetic]** Engineered concentric ring spatial proximity. |
+
+
 
 ### B. CATEGORICAL VALUE LEXICON
 *The following lexicon decodes the standard abbreviations used across nominal and ordinal features within the Ames dataset. Features with an inherent hierarchical order (Ordinal Variables) have been mapped with a sequenced numeric rank (e.g., Rank 5 to 0) to guide downstream Machine Learning encoding.*
