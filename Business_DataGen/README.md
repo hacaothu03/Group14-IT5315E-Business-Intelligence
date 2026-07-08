@@ -14,7 +14,7 @@ Real estate listing platforms, buyers, and sellers all need a fast, defensible e
 According to the project requirements, the KPIs must address the business cost of over/under-valuation:
 *   **Business Cost of Over-valuation (Predicting too high):** An inaccurately inflated estimate scares away serious buyers. This leads to properties staying on the market longer (increased days-on-market), causing frustration for sellers and reducing trust in the platform's accuracy.
 *   **Business Cost of Under-valuation (Predicting too low):** An artificially low estimate "leaves money on the table for the seller". Sellers may refuse to list their properties on the platform if they feel the algorithm is undervaluing their assets.
-*   **Prediction Error Tolerance:** Aim for an acceptable margin of error where a high percentage (e.g., 80-90%) of the model's predictions fall within ±10% of the actual closing sale price.
+*   **Prediction Error Tolerance:** Aim for an acceptable margin of error where a high percentage (e.g., 75-90%) of the model's predictions fall within ±10% of the actual closing sale price.
 
 **3. Evaluation Metrics:**
 To measure the success of the models and align with the business KPIs, the modeling team is required to use the following regression metrics and techniques:
