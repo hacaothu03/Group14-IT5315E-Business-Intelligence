@@ -27,7 +27,7 @@ Primary training file:
 CleanData/data-v2/processed/train_cleaned.csv
 ```
 
-Module 3 removed the two high-leverage outliers and handled data cleaning. Module 4-5 did not modify `CleanData/`.
+Module 3 removed the two high-leverage outliers and handled data cleaning. Module 4 Feature Engineering and Module 5 Model Development did not modify `CleanData/`.
 
 ## Input Feature Categories
 

@@ -2,11 +2,14 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SRC = ROOT / "src"
+REPO_ROOT = ROOT.parent
+SRC = REPO_ROOT / "Model_Development" / "src"
+os.environ.setdefault("HOUSE_PRICE_MODULE_DIR", str(ROOT))
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 

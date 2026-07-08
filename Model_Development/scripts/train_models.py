@@ -63,6 +63,8 @@ def parse_args() -> argparse.Namespace:
 
 
 def save_feature_lists(train_df: pd.DataFrame, args: argparse.Namespace) -> None:
+    feature_output_dir = config.REPO_ROOT / "Feature_Engineering" / "outputs"
+    feature_output_dir.mkdir(parents=True, exist_ok=True)
     full = get_engineered_feature_frame(
         train_df,
         include_derived=True,
@@ -85,9 +87,9 @@ def save_feature_lists(train_df: pd.DataFrame, args: argparse.Namespace) -> None
         include_mortgage_rate=args.include_mortgage_rate,
         feature_set="reduced_linear",
     )
-    pd.DataFrame({"feature": full.columns}).to_csv(config.OUTPUT_DIR / "feature_list_full.csv", index=False)
-    pd.DataFrame({"feature": reduced.columns}).to_csv(config.OUTPUT_DIR / "feature_list_reduced_linear.csv", index=False)
-    compute_vif_report(reduced).to_csv(config.OUTPUT_DIR / "vif_report.csv", index=False)
+    pd.DataFrame({"feature": full.columns}).to_csv(feature_output_dir / "feature_list_full.csv", index=False)
+    pd.DataFrame({"feature": reduced.columns}).to_csv(feature_output_dir / "feature_list_reduced_linear.csv", index=False)
+    compute_vif_report(reduced).to_csv(feature_output_dir / "vif_report.csv", index=False)
 
 
 def make_submission(best_pipeline: object, test_data_arg: str | None) -> None:
@@ -150,7 +152,7 @@ def main() -> int:
 
     logging.info("Loaded training data from %s (%s)", resolved_train.path, resolved_train.source)
     if resolved_train.used_raw_fallback:
-        logging.warning("This run used raw Kaggle train.csv. Do not use these results as final Module 4-5 results.")
+        logging.warning("This run used raw Kaggle train.csv. Do not use these results as final Module 4 or Module 5 results.")
 
     save_feature_lists(train_df, args)
     x, y_price = split_target(train_df)

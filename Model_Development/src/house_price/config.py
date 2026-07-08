@@ -1,14 +1,16 @@
-"""Configuration for the Module 4-5 house price pipeline."""
+"""Configuration for the house price feature/modeling pipeline."""
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 RANDOM_SEED = 42
 TARGET_COLUMN = "sale_price"
 ID_COLUMN = "id"
 
-MODULE_DIR = Path(__file__).resolve().parents[2]
+DEFAULT_MODULE_DIR = Path(__file__).resolve().parents[2]
+MODULE_DIR = Path(os.environ.get("HOUSE_PRICE_MODULE_DIR", DEFAULT_MODULE_DIR)).resolve()
 REPO_ROOT = MODULE_DIR.parent
 
 KAGGLE_MODE = Path("/kaggle/input").exists()
