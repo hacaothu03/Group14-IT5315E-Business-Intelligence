@@ -3,11 +3,19 @@
 ## 0. DATASET OVERVIEW
 This dataset is an enriched version of the original Ames Housing dataset compiled by Dean De Cock <sup>[[1]](#ref1)</sup>, originally sourced directly from the Ames City Assessor's Office, fused with historical macroeconomic data <sup>[[2]](#ref2)</sup>.
 * **Base Data:** Contains historical residential property sales in Ames, Iowa, USA, occurring between 2006 and 2010 (2,930 observations and 82 original explanatory variables) <sup>[[1]](#ref1)</sup>.
-* **Enrichment:** The base dataset has been appended with **5 custom-engineered contextual features**, bringing the final structure to **87 total features**. This enrichment captures temporal ageing, macroeconomic conditions, spatial proximity, and market exposure — specifically integrating historical U.S. 30-year fixed mortgage rate time-series data sourced from **Freddie Mac** <sup>[[2]](#ref2)</sup>, mapped precisely to the month and year of each property sale.
+* **Enrichment:** The base dataset has been appended with **5 engineered contextual features** (2 derived, 1 integrated from an external empirical source, 2 synthesised), bringing the final structure to **87 total features**. This enrichment captures temporal ageing, macroeconomic conditions, spatial proximity, and market exposure — specifically integrating historical U.S. 30-year fixed mortgage rate time-series data sourced from **Freddie Mac** <sup>[[2]](#ref2)</sup>, mapped precisely to the month and year of each property sale.
 
 ---
-## 1. SYNTHETIC & CONTEXTUAL FEATURES
-*The base dataset has been enriched with 5 contextual and synthetic features, listed below in dataset column order. The table justifies the realism, generation logic, and business assumptions used for these newly engineered variables.*
+## 1. ENGINEERED CONTEXTUAL FEATURES
+*The base dataset has been enriched with 5 engineered features, listed below in dataset column order. The table justifies the realism, generation logic, and business assumptions used for each.*
+
+**Provenance tiers.** The 5 features do not carry equal evidential weight. The distinction is material for downstream interpretation and is flagged in the appendix labels:
+
+| Tier | Features | Nature |
+| :--- | :--- | :--- |
+| **`[Derived]`** | `Age At Sale`, `Years Since Remodel` | Arithmetic transformations of recorded facts. Same authority as the source data. |
+| **`[Integrated]`** | `Mortgage Rate` | **Empirical data from an external source** (Freddie Mac PMMS). Not modelled. Its only qualification is one of *resolution* — a national rate proxying a local cost of credit — not of *authenticity*. |
+| **`[Synthetic]`** | `Days on Market`, `Distance to Center` | **Modelled proxies.** Neither exists in the source data; both are generated from documented behavioural/geographic assumptions and must not be read as ground truth. |
 
 | Feature Name | Data Type | Valid Range | Generation Logic & Business Assumption |
 | :--- | :--- | :--- | :--- |
@@ -26,7 +34,7 @@ This dataset is an enriched version of the original Ames Housing dataset compile
 
 | **Feature Cluster** | **Representative Variables Included** | **Expected Operational Range** | **Business Meaning & Logic** |
 | ------ | ------ | ------ | ------ |
-| **1. Target & Synthetic Features** | `SalePrice`, `Days on Market`, `Distance to Center`, `Mortgage Rate` | **Price:** > $0 <br> **DOM:** 21 to 170 Days <br> **Dist:** 0.1 to ~6.0 Miles | Contains the target variable (`SalePrice`) and the synthetic contextual features engineered to reflect market exposure, concentric spatial proximity, and macroeconomic borrowing cost. |
+| **1. Target & Engineered Contextual Features** | `SalePrice`, `Days on Market`, `Distance to Center`, `Mortgage Rate` | **Price:** > $0 <br> **DOM:** 21 to 170 Days <br> **Dist:** 0.1 to ~6.0 Miles | Contains the target variable (`SalePrice`) together with the engineered contextual features: two synthesised (`Days on Market`, `Distance to Center`) and one integrated from an external empirical source (`Mortgage Rate`). See the provenance tiers in Section 1. |
 | **2. Derived Temporal Features** | `Age At Sale`, `Years Since Remodel`, `Yr Sold`, `Mo Sold` | **Age:** -5 to ~150 Years <br> **Sold:** 2006-2010 | Physical age and renovation timelines. *Note: Negative values are explicitly retained to accurately reflect off-plan (pre-construction) contracts.* |
 | **3. Transaction Conditions** | `Sale Type`, `Sale Condition` | WD, New, Partial, Normal, Abnorml, etc. | Context of the sale. A `Partial` condition explicitly identifies pre-construction/unfinished properties, materially impacting price formation. |
 | **4. Lot & Location** | `Neighborhood`, `MS Zoning`, `Lot Area`, `Lot Frontage`, `Condition 1/2` | **Area:** > 0 Sq.Ft <br> **Zones:** RL, RM, etc. | Geographical zoning, neighborhood clustering, and proximity to externalities (e.g., positive: parks; negative: arterial streets, railroads). |
@@ -40,7 +48,7 @@ This dataset is an enriched version of the original Ames Housing dataset compile
 ## 3. APPENDIX: TECHNICAL DATA DICTIONARY & LEXICON
 
 ### A. EXPECTED OPERATIONAL RANGES & FULL FEATURE LIST (87 VARIABLES)
-**Disclaimer on Expected Operational Ranges:** *The limits documented below reflect the historical bounds of the Ames, Iowa housing market and the constraints of our synthetic feature engineering. While new records could theoretically exceed these physical bounds, they should be operationally flagged as 'Out-of-Distribution' outliers. Engineered variables such as `Days on Market` are mathematically bounded by the construction of their generating function rather than by post-hoc capping.*
+**Disclaimer on Expected Operational Ranges:** *The limits documented below reflect the historical bounds of the Ames, Iowa housing market and the constraints of our feature engineering. While new records could theoretically exceed these physical bounds, they should be operationally flagged as 'Out-of-Distribution' outliers. Engineered variables such as `Days on Market` are mathematically bounded by the construction of their generating function rather than by post-hoc capping.*
 
 | **No.** | **Feature Name** | **Data Type** | **Expected Operational Range** | **Business Description** |
 | ------ | ------ | ------ | ------ | ------ |
@@ -128,7 +136,7 @@ This dataset is an enriched version of the original Ames Housing dataset compile
 | 82 | **SalePrice** | Numeric (Int) | > 0 USD | **[Target Variable]** The property's actual sale price. |
 | 83 | **Age At Sale** | Numeric (Int) | -5 to ~150 Years | **[Derived]** `Yr Sold` - `Year Built`. Negatives retained for off-plan sales. |
 | 84 | **Years Since Remodel** | Numeric (Int) | -5 to ~150 Years | **[Derived]** `Yr Sold` - `Year Remod/Add`. Effective age / modernization status. |
-| 85 | **Mortgage Rate** | Numeric (Float) | 4.5% to 6.8% | **[Synthetic]** Macroeconomic borrowing cost at the month and year of sale. |
+| 85 | **Mortgage Rate** | Numeric (Float) | 4.5% to 6.8% | **[Integrated]** Actual published Freddie Mac 30-yr fixed rate, monthly mean, joined on month and year of sale. |
 | 86 | **Days on Market** | Numeric (Int) | 21 to 170 Days | **[Synthetic]** Elapsed market exposure at the valuation instant. Bounded by construction at 160.5 days before noise. |
 | 87 | **Distance to Center** | Numeric (Float) | 0.1 to ~6.0 Miles | **[Synthetic]** Concentric-zone spatial proximity to the city center / ISU campus. |
 
