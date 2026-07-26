@@ -9,5 +9,8 @@ context/
 .ruff_cache/
 .coverage
 *.log
+*.zip
 .DS_Store
 Thumbs.db
+report/
+slides/

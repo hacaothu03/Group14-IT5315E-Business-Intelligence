@@ -1,0 +1,25 @@
+# Module 6-7 deployment + monitoring dependencies.
+# Python 3.11+ recommended.
+
+# --- ML / inference stack --------------------------------------------------
+# Pinned to the tested versions that load the saved lasso_v1 pipeline correctly.
+# (The artifact carries a newer scikit-learn version tag; these versions load it
+#  with only a suppressed InconsistentVersionWarning and identical predictions.)
+scikit-learn==1.6.1
+numpy==2.2.5
+pandas==2.2.3
+scipy==1.15.2
+joblib==1.5.0
+
+# --- API (Module 6) --------------------------------------------------------
+fastapi==0.139.0
+uvicorn[standard]==0.50.2
+pydantic==2.11.4
+
+# --- Demo UI (Module 6) ----------------------------------------------------
+streamlit==1.59.0
+plotly==5.24.1  # pinned <6 for Evidently 0.7.x compatibility
+requests==2.32.3
+
+# --- Monitoring (Module 7) -------------------------------------------------
+evidently==0.7.14

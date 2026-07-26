@@ -1,0 +1,11 @@
+# Runtime prediction logs (keep the folder, ignore contents).
+logs/*.jsonl
+logs/*.log
+
+# Generated Evidently reports.
+monitoring/reports/*.html
+
+# Python caches.
+__pycache__/
+*.pyc
+.pytest_cache/

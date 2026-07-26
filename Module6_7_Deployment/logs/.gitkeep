@@ -1,0 +1,2 @@
+# Keeps the logs/ directory in version control.
+# Prediction logs (predictions.jsonl) are written here at runtime and gitignored.
